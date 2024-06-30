@@ -1,3 +1,11 @@
 node_modules
 # Keep environment variables out of version control
 .env
+
+src/models/migrations/20240630093558_/migration.sql
+
+src/models/migrations/20240630152513_/migration.sql
+
+src/models/migrations/
+
+package-lock.json

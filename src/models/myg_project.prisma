@@ -1,0 +1,378 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id            Int                 @id @default(autoincrement())
+  email              String              @unique
+  password           String
+  user_label         UserLabel
+  role               UserRole
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @default(now())
+  userProfiles       UserProfile[]
+  socialMedias       SocialMedia[]
+  userCoins          UserCoin[]
+  notifications      Notification[]
+  materials          Material[]          @relation("MaterialUploader")
+  trainings          Training[]          @relation("TrainingUploader")
+  messagesSent       Message[]           @relation("MessageSender")
+  messagesReceived   Message[]           @relation("MessageReceiver")
+  exams              Exam[]              @relation("ExamCreator")
+  examResults        ExamResult[]
+  products           Product[]           @relation("ProductUploader")
+  orders             Order[]
+  carts              Cart[]
+  wishlists          Wishlist[]
+  guidelines         Guideline[]         @relation("GuidelineUploader")
+  beautyServices     BeautyService[]     @relation("BeautyServiceUploader")
+  beautyAppointments BeautyAppointment[]
+  reviews            Review[]
+}
+
+model Admin {
+  admin_id    Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  password    String
+  permissions String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+}
+
+model UserProfile {
+  profile_id      Int      @id @default(autoincrement())
+  user_id         Int
+  full_name       String
+  studio_name     String
+  address         String
+  phone_number    String
+  profile_picture String
+  birthdate       DateTime
+  created_at      DateTime @default(now())
+  updated_at      DateTime @default(now())
+  User            User     @relation(fields: [user_id], references: [user_id])
+}
+
+model UserCoin {
+  coin_id Int  @id @default(autoincrement())
+  user_id Int
+  value   Int
+  User    User @relation(fields: [user_id], references: [user_id])
+}
+
+model SocialMedia {
+  social_media_id      Int             @id @default(autoincrement())
+  user_id              Int
+  social_media_account String
+  social_media_type    SocialMediaType
+  User                 User            @relation(fields: [user_id], references: [user_id])
+}
+
+model Notification {
+  notification_id   Int              @id @default(autoincrement())
+  user_id           Int
+  notification_type NotificationType
+  message           String
+  sent_at           DateTime         @default(now())
+  User              User             @relation(fields: [user_id], references: [user_id])
+}
+
+model Training {
+  training_id   Int        @id @default(autoincrement())
+  training_name String
+  description   String
+  uploaded_by   Int
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now())
+  materials     Material[]
+  User          User       @relation("TrainingUploader", fields: [uploaded_by], references: [user_id])
+}
+
+model Material {
+  material_id       Int             @id @default(autoincrement())
+  training_id       Int
+  title             String
+  description       String
+  type              MaterialType
+  membership_level  MembershipLevel
+  banner            String
+  form_registration String
+  ebook             String
+  youtube_video     String
+  zoom_record       String
+  uploaded_by       Int
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @default(now())
+  Training          Training        @relation(fields: [training_id], references: [training_id])
+  User              User            @relation("MaterialUploader", fields: [uploaded_by], references: [user_id])
+}
+
+model Message {
+  message_id  Int      @id @default(autoincrement())
+  sender_id   Int
+  receiver_id Int
+  content     String
+  sent_at     DateTime @default(now())
+  updated_at  DateTime @default(now())
+  is_deleted  Boolean  @default(false)
+  sender      User     @relation("MessageSender", fields: [sender_id], references: [user_id])
+  receiver    User     @relation("MessageReceiver", fields: [receiver_id], references: [user_id])
+}
+
+model Exam {
+  exam_id     Int          @id @default(autoincrement())
+  title       String
+  description String
+  type        ExamType
+  created_by  Int
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @default(now())
+  questions   Question[]
+  User        User         @relation("ExamCreator", fields: [created_by], references: [user_id])
+  ExamResult  ExamResult[]
+}
+
+model Question {
+  question_id    Int          @id @default(autoincrement())
+  exam_id        Int
+  question_text  String
+  question_type  QuestionType
+  options        Json
+  correct_answer String
+  Exam           Exam         @relation(fields: [exam_id], references: [exam_id])
+}
+
+model ExamResult {
+  result_id    Int      @id @default(autoincrement())
+  exam_id      Int
+  user_id      Int
+  score        Int
+  completed_at DateTime @default(now())
+  Exam         Exam     @relation(fields: [exam_id], references: [exam_id])
+  User         User     @relation(fields: [user_id], references: [user_id])
+}
+
+model Product {
+  product_id     Int            @id @default(autoincrement())
+  name           String
+  description    String
+  price_id       Int
+  stock          Int
+  product_images Json
+  type           ProductType
+  uploaded_by    Int
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @default(now())
+  price          ProductPrice[]
+  User           User           @relation("ProductUploader", fields: [uploaded_by], references: [user_id])
+  OrderItem      OrderItem[]
+  Cart           Cart[]
+  Wishlist       Wishlist[]
+  Guideline      Guideline[]
+}
+
+model ProductPrice {
+  price_id   Int       @id @default(autoincrement())
+  product_id Int
+  type       PriceType
+  price      Decimal
+  Product    Product   @relation(fields: [product_id], references: [product_id])
+}
+
+model Order {
+  order_id     Int         @id @default(autoincrement())
+  user_id      Int
+  total_amount Decimal
+  status       OrderStatus
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @default(now())
+  orderItems   OrderItem[]
+  User         User        @relation(fields: [user_id], references: [user_id])
+}
+
+model OrderItem {
+  order_item_id Int     @id @default(autoincrement())
+  order_id      Int
+  product_id    Int
+  quantity      Int
+  price         Decimal
+  Order         Order   @relation(fields: [order_id], references: [order_id])
+  Product       Product @relation(fields: [product_id], references: [product_id])
+}
+
+model Cart {
+  cart_id    Int     @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  quantity   Int
+  User       User    @relation(fields: [user_id], references: [user_id])
+  Product    Product @relation(fields: [product_id], references: [product_id])
+}
+
+model Wishlist {
+  wishlist_id Int     @id @default(autoincrement())
+  user_id     Int
+  product_id  Int
+  User        User    @relation(fields: [user_id], references: [user_id])
+  Product     Product @relation(fields: [product_id], references: [product_id])
+}
+
+model Guideline {
+  guideline_id Int           @id @default(autoincrement())
+  product_id   Int
+  type         GuidelineType
+  content      String
+  details      String
+  uploaded_by  Int
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @default(now())
+  Product      Product       @relation(fields: [product_id], references: [product_id])
+  User         User          @relation("GuidelineUploader", fields: [uploaded_by], references: [user_id])
+}
+
+model BeautyService {
+  service_id         Int                 @id @default(autoincrement())
+  title              String
+  description        String
+  price              Decimal
+  duration           Int
+  uploaded_by        Int
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @default(now())
+  availability       Availability[]
+  beautyAppointments BeautyAppointment[]
+  reviews            Review[]
+  User               User                @relation("BeautyServiceUploader", fields: [uploaded_by], references: [user_id])
+}
+
+model BeautyAppointment {
+  appointment_id   Int               @id @default(autoincrement())
+  user_id          Int
+  service_id       Int
+  appointment_date DateTime
+  appointment_time DateTime
+  status           AppointmentStatus
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @default(now())
+  User             User              @relation(fields: [user_id], references: [user_id])
+  BeautyService    BeautyService     @relation(fields: [service_id], references: [service_id])
+}
+
+model Availability {
+  availability_id Int           @id @default(autoincrement())
+  service_id      Int
+  day             Day
+  start_time      DateTime
+  end_time        DateTime
+  BeautyService   BeautyService @relation(fields: [service_id], references: [service_id])
+}
+
+model Review {
+  review_id     Int           @id @default(autoincrement())
+  user_id       Int
+  service_id    Int
+  rating        Int
+  comment       String
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @default(now())
+  User          User          @relation(fields: [user_id], references: [user_id])
+  BeautyService BeautyService @relation(fields: [service_id], references: [service_id])
+}
+
+enum UserLabel {
+  SAHABAT_MY_ACADEMI
+  RETAIL
+  AGENT
+  DISTRIBUTOR
+}
+
+enum UserRole {
+  VISITOR
+  MEMBER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum SocialMediaType {
+  TWITTER
+  FACEBOOK
+  YOUTUBE
+  INSTAGRAM
+}
+
+enum NotificationType {
+  BIRTHDAY
+  TRANSFER
+}
+
+enum MaterialType {
+  OFFLINE
+  ONLINE
+  ASYNCHRONOUS
+}
+
+enum MembershipLevel {
+  PREMIUM
+  FREE
+}
+
+enum ExamType {
+  ONLINE
+  OFFLINE
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  ESSAY
+}
+
+enum ProductType {
+  PRODUCT
+  SERVICE
+  RETAIL
+  AGENT
+  DISTRIBUTOR
+}
+
+enum PriceType {
+  SAHABAT_MY_ACADEMI
+  RETAIL
+  AGENT
+  DISTRIBUTOR
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum GuidelineType {
+  RETAIL
+  AGENT
+  DISTRIBUTOR
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum Day {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
