@@ -8,281 +8,292 @@ datasource db {
 }
 
 model User {
-  user_id            Int                 @id @default(autoincrement())
-  email              String              @unique
-  password           String
-  user_label         UserLabel
-  role               UserRole
-  created_at         DateTime            @default(now())
-  updated_at         DateTime            @default(now())
-  userProfiles       UserProfile[]
-  socialMedias       SocialMedia[]
-  userCoins          UserCoin[]
-  notifications      Notification[]
-  materials          Material[]          @relation("MaterialUploader")
-  trainings          Training[]          @relation("TrainingUploader")
-  messagesSent       Message[]           @relation("MessageSender")
-  messagesReceived   Message[]           @relation("MessageReceiver")
-  exams              Exam[]              @relation("ExamCreator")
-  examResults        ExamResult[]
-  products           Product[]           @relation("ProductUploader")
-  orders             Order[]
-  carts              Cart[]
-  wishlists          Wishlist[]
-  guidelines         Guideline[]         @relation("GuidelineUploader")
-  beautyServices     BeautyService[]     @relation("BeautyServiceUploader")
+  userId            Int                 @id @default(autoincrement())
+  email             String              @unique
+  password          String
+  userLabel         UserLabel           @default(SAHABAT_MY_ACADEMI)
+  role              UserRole
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now())
+  
+  refreshToken      RefreshToken[]
+  userProfiles      UserProfile[]
+  socialMedias      SocialMedia[]
+  userCoins         UserCoin[]
+  notifications     Notification[]
+  materials         Material[]          @relation("MaterialUploader")
+  trainings         Training[]          @relation("TrainingUploader")
+  messagesSent      Message[]           @relation("MessageSender")
+  messagesReceived  Message[]           @relation("MessageReceiver")
+  exams             Exam[]              @relation("ExamCreator")
+  examResults       ExamResult[]
+  products          Product[]           @relation("ProductUploader")
+  orders            Order[]
+  carts             Cart[]
+  wishlists         Wishlist[]
+  guidelines        Guideline[]         @relation("GuidelineUploader")
+  beautyServices    BeautyService[]     @relation("BeautyServiceUploader")
   beautyAppointments BeautyAppointment[]
-  reviews            Review[]
+  reviews           Review[]
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [userId])
 }
 
 model Admin {
-  admin_id    Int      @id @default(autoincrement())
-  name        String
-  email       String   @unique
-  password    String
+  adminId    Int      @id @default(autoincrement())
+  name       String
+  email      String   @unique
+  password   String
   permissions String
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
 }
 
 model UserProfile {
-  profile_id      Int      @id @default(autoincrement())
-  user_id         Int
-  full_name       String
-  studio_name     String
-  address         String
-  phone_number    String
-  profile_picture String
-  birthdate       DateTime
-  created_at      DateTime @default(now())
-  updated_at      DateTime @default(now())
-  User            User     @relation(fields: [user_id], references: [user_id])
+  profileId      Int      @id @default(autoincrement())
+  userId         Int      @default(1)
+  fullName       String
+  studioName     String
+  address        String
+  phoneNumber    String
+  profilePicture String
+  birthdate      DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [userId])
 }
 
 model UserCoin {
-  coin_id Int  @id @default(autoincrement())
-  user_id Int
-  value   Int
-  User    User @relation(fields: [user_id], references: [user_id])
+  coinId Int  @id @default(autoincrement())
+  userId Int
+  value  Int
+  user   User @relation(fields: [userId], references: [userId])
 }
 
 model SocialMedia {
-  social_media_id      Int             @id @default(autoincrement())
-  user_id              Int
-  social_media_account String
-  social_media_type    SocialMediaType
-  User                 User            @relation(fields: [user_id], references: [user_id])
+  socialMediaId      Int             @id @default(autoincrement())
+  userId             Int
+  socialMediaAccount String
+  socialMediaType    SocialMediaType
+  user               User            @relation(fields: [userId], references: [userId])
 }
 
 model Notification {
-  notification_id   Int              @id @default(autoincrement())
-  user_id           Int
-  notification_type NotificationType
-  message           String
-  sent_at           DateTime         @default(now())
-  User              User             @relation(fields: [user_id], references: [user_id])
+  notificationId   Int              @id @default(autoincrement())
+  userId           Int
+  notificationType NotificationType
+  message          String
+  sentAt           DateTime         @default(now())
+  user             User             @relation(fields: [userId], references: [userId])
 }
 
 model Training {
-  training_id   Int        @id @default(autoincrement())
-  training_name String
-  description   String
-  uploaded_by   Int
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @default(now())
-  materials     Material[]
-  User          User       @relation("TrainingUploader", fields: [uploaded_by], references: [user_id])
+  trainingId   Int        @id @default(autoincrement())
+  trainingName String
+  description  String
+  uploadedBy   Int
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now())
+  materials    Material[]
+  user         User       @relation("TrainingUploader", fields: [uploadedBy], references: [userId])
 }
 
 model Material {
-  material_id       Int             @id @default(autoincrement())
-  training_id       Int
-  title             String
-  description       String
-  type              MaterialType
-  membership_level  MembershipLevel
-  banner            String
-  form_registration String
-  ebook             String
-  youtube_video     String
-  zoom_record       String
-  uploaded_by       Int
-  created_at        DateTime        @default(now())
-  updated_at        DateTime        @default(now())
-  Training          Training        @relation(fields: [training_id], references: [training_id])
-  User              User            @relation("MaterialUploader", fields: [uploaded_by], references: [user_id])
+  materialId       Int             @id @default(autoincrement())
+  trainingId       Int
+  title            String
+  description      String
+  type             MaterialType
+  membershipLevel  MembershipLevel
+  banner           String
+  formRegistration String
+  ebook            String
+  youtubeVideo     String
+  zoomRecord       String
+  uploadedBy       Int
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now())
+  training         Training        @relation(fields: [trainingId], references: [trainingId])
+  user             User            @relation("MaterialUploader", fields: [uploadedBy], references: [userId])
 }
 
 model Message {
-  message_id  Int      @id @default(autoincrement())
-  sender_id   Int
-  receiver_id Int
-  content     String
-  sent_at     DateTime @default(now())
-  updated_at  DateTime @default(now())
-  is_deleted  Boolean  @default(false)
-  sender      User     @relation("MessageSender", fields: [sender_id], references: [user_id])
-  receiver    User     @relation("MessageReceiver", fields: [receiver_id], references: [user_id])
+  messageId  Int      @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  content    String
+  sentAt     DateTime @default(now())
+  updatedAt  DateTime @default(now())
+  isDeleted  Boolean  @default(false)
+  sender     User     @relation("MessageSender", fields: [senderId], references: [userId])
+  receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [userId])
 }
 
 model Exam {
-  exam_id     Int          @id @default(autoincrement())
-  title       String
+  examId     Int          @id @default(autoincrement())
+  title      String
   description String
-  type        ExamType
-  created_by  Int
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @default(now())
-  questions   Question[]
-  User        User         @relation("ExamCreator", fields: [created_by], references: [user_id])
-  ExamResult  ExamResult[]
+  type       ExamType
+  createdBy  Int
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now())
+  questions  Question[]
+  user       User         @relation("ExamCreator", fields: [createdBy], references: [userId])
+  examResults ExamResult[]
 }
 
 model Question {
-  question_id    Int          @id @default(autoincrement())
-  exam_id        Int
-  question_text  String
-  question_type  QuestionType
-  options        Json
-  correct_answer String
-  Exam           Exam         @relation(fields: [exam_id], references: [exam_id])
+  questionId    Int          @id @default(autoincrement())
+  examId        Int
+  questionText  String
+  questionType  QuestionType
+  options       Json
+  correctAnswer String
+  exam          Exam         @relation(fields: [examId], references: [examId])
 }
 
 model ExamResult {
-  result_id    Int      @id @default(autoincrement())
-  exam_id      Int
-  user_id      Int
-  score        Int
-  completed_at DateTime @default(now())
-  Exam         Exam     @relation(fields: [exam_id], references: [exam_id])
-  User         User     @relation(fields: [user_id], references: [user_id])
+  resultId    Int      @id @default(autoincrement())
+  examId      Int
+  userId      Int
+  score       Int
+  completedAt DateTime @default(now())
+  exam        Exam     @relation(fields: [examId], references: [examId])
+  user        User     @relation(fields: [userId], references: [userId])
 }
 
 model Product {
-  product_id     Int            @id @default(autoincrement())
-  name           String
-  description    String
-  price_id       Int
-  stock          Int
-  product_images Json
-  type           ProductType
-  uploaded_by    Int
-  created_at     DateTime       @default(now())
-  updated_at     DateTime       @default(now())
-  price          ProductPrice[]
-  User           User           @relation("ProductUploader", fields: [uploaded_by], references: [user_id])
-  OrderItem      OrderItem[]
-  Cart           Cart[]
-  Wishlist       Wishlist[]
-  Guideline      Guideline[]
+  productId     Int            @id @default(autoincrement())
+  name          String
+  description   String
+  priceId       Int
+  stock         Int
+  productImages Json
+  type          ProductType
+  uploadedBy    Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now())
+  price         ProductPrice[]
+  user          User           @relation("ProductUploader", fields: [uploadedBy], references: [userId])
+  orderItems    OrderItem[]
+  cart          Cart[]
+  wishlist      Wishlist[]
+  guideline     Guideline[]
 }
 
 model ProductPrice {
-  price_id   Int       @id @default(autoincrement())
-  product_id Int
-  type       PriceType
-  price      Decimal
-  Product    Product   @relation(fields: [product_id], references: [product_id])
+  priceId   Int       @id @default(autoincrement())
+  productId Int
+  type      PriceType
+  price     Decimal
+  product   Product   @relation(fields: [productId], references: [productId])
 }
 
 model Order {
-  order_id     Int         @id @default(autoincrement())
-  user_id      Int
-  total_amount Decimal
-  status       OrderStatus
-  created_at   DateTime    @default(now())
-  updated_at   DateTime    @default(now())
-  orderItems   OrderItem[]
-  User         User        @relation(fields: [user_id], references: [user_id])
+  orderId     Int         @id @default(autoincrement())
+  userId      Int
+  totalAmount Decimal
+  status      OrderStatus
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+  user        User        @relation(fields: [userId], references: [userId])
 }
 
 model OrderItem {
-  order_item_id Int     @id @default(autoincrement())
-  order_id      Int
-  product_id    Int
-  quantity      Int
-  price         Decimal
-  Order         Order   @relation(fields: [order_id], references: [order_id])
-  Product       Product @relation(fields: [product_id], references: [product_id])
+  orderItemId Int     @id @default(autoincrement())
+  orderId     Int
+  productId   Int
+  quantity    Int
+  price       Decimal
+  order       Order   @relation(fields: [orderId], references: [orderId])
+  product     Product @relation(fields: [productId], references: [productId])
 }
 
 model Cart {
-  cart_id    Int     @id @default(autoincrement())
-  user_id    Int
-  product_id Int
-  quantity   Int
-  User       User    @relation(fields: [user_id], references: [user_id])
-  Product    Product @relation(fields: [product_id], references: [product_id])
+  cartId    Int     @id @default(autoincrement())
+  userId    Int
+  productId Int
+  quantity  Int
+  user      User    @relation(fields: [userId], references: [userId])
+  product   Product @relation(fields: [productId], references: [productId])
 }
 
 model Wishlist {
-  wishlist_id Int     @id @default(autoincrement())
-  user_id     Int
-  product_id  Int
-  User        User    @relation(fields: [user_id], references: [user_id])
-  Product     Product @relation(fields: [product_id], references: [product_id])
+  wishlistId Int     @id @default(autoincrement())
+  userId     Int
+  productId  Int
+  user       User    @relation(fields: [userId], references: [userId])
+  product    Product @relation(fields: [productId], references: [productId])
 }
 
 model Guideline {
-  guideline_id Int           @id @default(autoincrement())
-  product_id   Int
-  type         GuidelineType
-  content      String
-  details      String
-  uploaded_by  Int
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @default(now())
-  Product      Product       @relation(fields: [product_id], references: [product_id])
-  User         User          @relation("GuidelineUploader", fields: [uploaded_by], references: [user_id])
+  guidelineId Int           @id @default(autoincrement())
+  productId   Int
+  type        GuidelineType
+  content     String
+  details     String
+  uploadedBy  Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
+  product     Product       @relation(fields: [productId], references: [productId])
+  user        User          @relation("GuidelineUploader", fields: [uploadedBy], references: [userId])
 }
 
 model BeautyService {
-  service_id         Int                 @id @default(autoincrement())
-  title              String
-  description        String
-  price              Decimal
-  duration           Int
-  uploaded_by        Int
-  created_at         DateTime            @default(now())
-  updated_at         DateTime            @default(now())
-  availability       Availability[]
+  serviceId         Int                 @id @default(autoincrement())
+  title             String
+  description       String
+  price             Decimal
+  duration          Int
+  uploadedBy        Int
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now())
+  availability      Availability[]
   beautyAppointments BeautyAppointment[]
-  reviews            Review[]
-  User               User                @relation("BeautyServiceUploader", fields: [uploaded_by], references: [user_id])
+  reviews           Review[]
+  user              User                @relation("BeautyServiceUploader", fields: [uploadedBy], references: [userId])
 }
 
 model BeautyAppointment {
-  appointment_id   Int               @id @default(autoincrement())
-  user_id          Int
-  service_id       Int
-  appointment_date DateTime
-  appointment_time DateTime
-  status           AppointmentStatus
-  created_at       DateTime          @default(now())
-  updated_at       DateTime          @default(now())
-  User             User              @relation(fields: [user_id], references: [user_id])
-  BeautyService    BeautyService     @relation(fields: [service_id], references: [service_id])
+  appointmentId   Int               @id @default(autoincrement())
+  userId          Int
+  serviceId       Int
+  appointmentDate DateTime
+  appointmentTime DateTime
+  status          AppointmentStatus
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now())
+  user            User              @relation(fields: [userId], references: [userId])
+  beautyService   BeautyService     @relation(fields: [serviceId], references: [serviceId])
 }
 
 model Availability {
-  availability_id Int           @id @default(autoincrement())
-  service_id      Int
-  day             Day
-  start_time      DateTime
-  end_time        DateTime
-  BeautyService   BeautyService @relation(fields: [service_id], references: [service_id])
+  availabilityId Int           @id @default(autoincrement())
+  serviceId      Int
+  day            Day
+  startTime      DateTime
+  endTime        DateTime
+  beautyService  BeautyService @relation(fields: [serviceId], references: [serviceId])
 }
 
 model Review {
-  review_id     Int           @id @default(autoincrement())
-  user_id       Int
-  service_id    Int
+  reviewId      Int           @id @default(autoincrement())
+  userId        Int
+  serviceId     Int
   rating        Int
   comment       String
-  created_at    DateTime      @default(now())
-  updated_at    DateTime      @default(now())
-  User          User          @relation(fields: [user_id], references: [user_id])
-  BeautyService BeautyService @relation(fields: [service_id], references: [service_id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now())
+  user          User          @relation(fields: [userId], references: [userId])
+  beautyService BeautyService @relation(fields: [serviceId], references: [serviceId])
 }
 
 enum UserLabel {
