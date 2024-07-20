@@ -7,6 +7,8 @@ const fs = require('fs');
 
 //auth routes
 const userRoutes = require('./route/authentication/userRoute');
+const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
+const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
 
 
 const PORT = process.env.PORT || 3001;
@@ -21,6 +23,8 @@ main.use(cookieParser());
 
 //use auth routes
 main.use('/myg/api', userRoutes);
+main.use('/myg/api/layanan', layananRoutes);
+main.use('/myg/api/', testimoniRoutes);
 
 main.listen(PORT, () => {
     console.log('Server is running! port: ' + PORT);
