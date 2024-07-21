@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const webResponses = require('../helpers/web/webResponses');
 
 const authMiddleware = (req, res, next) => {
-    const token = req.headers['authorization'];
+    const token = req.headers['authorization'] || req.cookies.accessToken;
     if (!token) {
         return res.status(401).json(webResponses.errorResponse('Access denied. No token provided.'));
     }

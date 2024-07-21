@@ -87,10 +87,25 @@ async function logoutUser(req, res) {
     }
 }
 
+async function getProfile(req, res) {
+    try {
+        const user = await userService.getUserById(req.user.userId);
+        if (!user) {
+            return res.status(404).json(webResponses.errorResponse('User not found'));
+        }
+        res.json(webResponses.successResponse('User profile fetched successfully', user));
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(webResponses.errorResponse('Failed to fetch user profile'));
+    }
+}
+
+
 module.exports = {
     getAllUsers,
     registerUser,
     loginUser,
     refreshAccessToken,
-    logoutUser
+    logoutUser,
+    getProfile
 };
