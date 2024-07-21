@@ -32,7 +32,6 @@ model User {
   carts             Cart[]
   wishlists         Wishlist[]
   guidelines        Guideline[]         @relation("GuidelineUploader")
-  beautyServices    BeautyService[]     @relation("BeautyServiceUploader")
   beautyAppointments BeautyAppointment[]
   reviews           Review[]
 }
@@ -254,13 +253,12 @@ model BeautyService {
   price             Decimal
   imageUrl          String?             
   viewCount         Int                 @default(0)
-  uploadedBy        Int
+
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @default(now())
   availability      Availability[]
   beautyAppointments BeautyAppointment[]
   reviews           Review[]
-  user              User                @relation("BeautyServiceUploader", fields: [uploadedBy], references: [userId])
 } 
 
 model BeautyAppointment {
