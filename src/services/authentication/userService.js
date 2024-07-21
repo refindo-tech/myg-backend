@@ -75,11 +75,16 @@ async function logoutUser(refreshToken) {
     }
 }
 
+async function getUserById(userId) {
+    return await database.user.findUnique({ where: { userId } });
+}
+
 
 module.exports = {
     getAllUsers,
     registerUser,
     loginUser,
     refreshAccessToken,
-    logoutUser
+    logoutUser,
+    getUserById
 };
