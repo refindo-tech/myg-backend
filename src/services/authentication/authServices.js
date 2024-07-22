@@ -1,20 +1,18 @@
-const { UserLabel } = require('@prisma/client');
 const { database } = require('../../helpers/config/db');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
-
 
 async function getAllUsers() {
     return await database.user.findMany();
 }
 
-async function registerUser( email, password, UserLabel, role ) {
+async function registerUser(email, password, userLabel, role) {
     const hashedPassword = await argon2.hash(password);
     return await database.user.create({
         data: {
             email,
             password: hashedPassword,
-            userLabel: UserLabel,
+            userLabel,
             role,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -48,7 +46,6 @@ async function loginUser(email, password) {
     return { accessToken, refreshToken, user };
 }
 
-
 async function refreshAccessToken(refreshToken) {
     try {
         const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
@@ -75,10 +72,20 @@ async function logoutUser(refreshToken) {
     }
 }
 
-async function getUserById(userId) {
-    return await database.user.findUnique({ where: { userId } });
+async function getUserProfile(userId) {
+    const user = await database.user.findUnique({
+        where: { userId },
+        select: {
+            userId: true,
+            email: true,
+            userLabel: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true
+        }
+    });
+    return user;
 }
-
 
 module.exports = {
     getAllUsers,
@@ -86,5 +93,5 @@ module.exports = {
     loginUser,
     refreshAccessToken,
     logoutUser,
-    getUserById
+    getUserProfile
 };

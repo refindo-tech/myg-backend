@@ -1,4 +1,4 @@
-const userRegistrationSchema = {
+const userRegistrationValidation = {
     type: 'object',
     properties: {
         email: { type: 'string', format: 'email' },
@@ -12,5 +12,5 @@ const userRegistrationSchema = {
 };
 
 module.exports = {
-    userRegistrationSchema,
+    userRegistrationValidation
 };
