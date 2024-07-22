@@ -6,6 +6,7 @@ require("dotenv").config();
 const fs = require('fs');
 
 //auth routes
+const authRoutes = require('./route/authentication/authRoute');
 const userRoutes = require('./route/authentication/userRoute');
 const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
 const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
@@ -23,7 +24,8 @@ main.use(bodyParser.urlencoded({
 main.use(cookieParser());
 
 //use auth routes
-main.use('/myg/api', userRoutes);
+main.use('/myg/auth', authRoutes);
+main.use('/myg/api/user', userRoutes);
 main.use('/myg/api/layanan', layananRoutes);
 main.use('/myg/api/', testimoniRoutes);
 main.use('/myg/api/materi', materiRoutes);
