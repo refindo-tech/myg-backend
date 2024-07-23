@@ -12,11 +12,7 @@ const userRegistrationValidation = {
                 phoneNumber: { type: 'string' },
                 birthdate: { type: 'string', format: 'date-time' },
                 socialMedia: { type: 'string' },
-                address: { type: 'string' },
-                profilePicture: { type: ['string', 'null'] },
-                studioName: { type: ['string', 'null'] },
-                ktpPicture: { type: ['string', 'null'] },
-                studioLogo: { type: ['string', 'null'] }
+                address: { type: 'string' }
             },
             required: ['fullName', 'phoneNumber', 'birthdate', 'socialMedia', 'address']
         }
