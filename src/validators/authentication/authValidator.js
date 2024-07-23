@@ -4,10 +4,24 @@ const userRegistrationValidation = {
         email: { type: 'string', format: 'email' },
         password: { type: 'string', minLength: 6 },
         confirmPassword: { type: 'string', minLength: 6 },
-        userLabel: { type: 'string', enum: ['SAHABAT_MY_ACADEMI', 'RETAIL', 'AGENT', 'DISTRIBUTOR'] },
-        role: { type: 'string', enum: ['VISITOR', 'MEMBER', 'ADMIN', 'SUPER_ADMIN'] }
+        role: { type: 'string', enum: ['VISITOR', 'MEMBER', 'ADMIN', 'SUPER_ADMIN'], default: 'MEMBER' },
+        userProfile: {
+            type: 'object',
+            properties: {
+                fullName: { type: 'string' },
+                phoneNumber: { type: 'string' },
+                birthdate: { type: 'string', format: 'date-time' },
+                socialMedia: { type: 'string' },
+                address: { type: 'string' },
+                profilePicture: { type: ['string', 'null'] },
+                studioName: { type: ['string', 'null'] },
+                ktpPicture: { type: ['string', 'null'] },
+                studioLogo: { type: ['string', 'null'] }
+            },
+            required: ['fullName', 'phoneNumber', 'birthdate', 'socialMedia', 'address']
+        }
     },
-    required: ['email', 'password', 'confirmPassword', 'userLabel', 'role'],
+    required: ['email', 'password', 'confirmPassword', 'userProfile'],
     additionalProperties: false
 };
 

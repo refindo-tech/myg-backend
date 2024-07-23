@@ -35,7 +35,7 @@ main.use(cookieParser());
 
 //use auth routes
 main.use('/myg/auth', authRoutes);
-main.use('/myg/api/user', userRoutes);
+main.use('/myg/api/', userRoutes);
 main.use('/myg/api/layanan', layananRoutes);
 main.use('/myg/api/', testimoniRoutes);
 main.use('/myg/api/materi', materiRoutes);
