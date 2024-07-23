@@ -26,9 +26,15 @@ async function registerUser(req, res) {
         res.status(201).json(webResponses.successResponse('User registered successfully', newUser));
     } catch (error) {
         console.error(error);
-        res.status(500).json(webResponses.errorResponse('Failed to register user'));
+
+        if (error.code === 'P2002' && error.meta && error.meta.target === 'User_email_key') {
+            return res.status(400).json(webResponses.errorResponse('Email is already in use'));
+        }
+
+        res.status(500).json(webResponses.errorResponse('Failed to register user', error.message));
     }
 }
+
 
 async function loginUser(req, res) {
     const { email, password } = req.body;
