@@ -2,21 +2,35 @@ const { database } = require('../../helpers/config/db');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 
-async function getAllUsers() {
-    return await database.user.findMany();
-}
 
-async function registerUser(email, password, userLabel, role) {
+async function registerUser(email, password, userProfile, role = 'MEMBER') {
     const hashedPassword = await argon2.hash(password);
     return await database.user.create({
         data: {
             email,
             password: hashedPassword,
-            userLabel,
             role,
             createdAt: new Date(),
             updatedAt: new Date(),
+            userProfiles: {
+                create: {
+                    fullName: userProfile.fullName,
+                    phoneNumber: userProfile.phoneNumber,
+                    birthdate: new Date(userProfile.birthdate),
+                    socialMedia: userProfile.socialMedia,
+                    address: userProfile.address,
+                    profilePicture: userProfile.profilePicture || null,
+                    studioName: userProfile.studioName || null,
+                    ktpPicture: userProfile.ktpPicture || null,
+                    studioLogo: userProfile.studioLogo || null,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }
+            }
         },
+        include: {
+            userProfiles: true
+        }
     });
 }
 
@@ -33,7 +47,7 @@ async function loginUser(email, password) {
     const accessToken = jwt.sign({ userId: user.userId, email: user.email }, process.env.JWT_SECRET, { expiresIn: '15m' });
     const refreshToken = jwt.sign({ userId: user.userId, email: user.email }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
-    // Store refresh token in database
+    // Store tokens in database
     await database.refreshToken.create({
         data: {
             token: refreshToken,
@@ -45,6 +59,7 @@ async function loginUser(email, password) {
 
     return { accessToken, refreshToken, user };
 }
+
 
 async function refreshAccessToken(refreshToken) {
     try {
@@ -75,20 +90,23 @@ async function logoutUser(refreshToken) {
 async function getUserProfile(userId) {
     const user = await database.user.findUnique({
         where: { userId },
-        select: {
-            userId: true,
-            email: true,
-            userLabel: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true
+        include: {
+            userProfiles: {
+                select: {
+                    profilePicture: true
+                }
+            }
         }
     });
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
     return user;
 }
 
 module.exports = {
-    getAllUsers,
     registerUser,
     loginUser,
     refreshAccessToken,
