@@ -18,7 +18,7 @@ async function getAllUsers(req, res) {
 
 
 async function registerUser(req, res) {
-    const validate = ajv.compile(userRegistrationSchema);
+    const validate = ajv.compile(userRegistrationValidation);
     const valid = validate(req.body);
 
     if (!valid) {
