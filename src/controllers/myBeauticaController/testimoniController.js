@@ -8,7 +8,8 @@ const ajv = new Ajv();
 
 async function getAllTestimonials(req, res) {
     try {
-        const testimonials = await testimoniService.getAllTestimonials();
+        const limit = parseInt(req.query.limit) || 3;
+        const testimonials = await testimoniService.getAllTestimonials(limit);
         const formattedTestimonials = testimonials.map(testimonial => {
             const fullName = testimonial.user.userProfiles[0]?.fullName || 'Unknown';
             return {

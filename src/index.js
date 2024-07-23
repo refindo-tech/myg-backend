@@ -12,6 +12,11 @@ const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
 const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
 const materiRoutes = require('./route/myAcademyRoute/materialsRoute');
 
+//mya routes
+//base mya route
+const myaRoutes = '/myg/api/mya';
+const productRoutes = require('./route/myaRoute/productRoute');
+
 
 const PORT = process.env.PORT || 3001;
 const main = express();
@@ -29,6 +34,9 @@ main.use('/myg/api/user', userRoutes);
 main.use('/myg/api/layanan', layananRoutes);
 main.use('/myg/api/', testimoniRoutes);
 main.use('/myg/api/materi', materiRoutes);
+
+//use mya routes
+main.use(myaRoutes + '/produk', productRoutes);
 
 main.listen(PORT, () => {
     console.log('Server is running! port: ' + PORT);
