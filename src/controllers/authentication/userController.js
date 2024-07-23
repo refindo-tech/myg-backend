@@ -1,111 +1,57 @@
-webResponses = require('../../helpers/web/webResponses');
-const userService = require('../../services/authentication/userService');
-const { userRegistrationSchema } = require('../../validators/userValidator');
-const Ajv = require('ajv');
-const addFormats = require('ajv-formats');
-const ajv = new Ajv();
-addFormats(ajv);
+const webResponses = require('../../helpers/web/webResponses');
+const userService = require('../../services/authentication/userSevices');
 
 async function getAllUsers(req, res) {
     try {
         const users = await userService.getAllUsers();
-        res.json(webResponses.successResponse('Users fetched successfully', users));
+        res.status(200).json(webResponses.successResponse('Users fetched successfully', users));
     } catch (error) {
         console.error(error);
         res.status(500).json(webResponses.errorResponse('Failed to fetch users'));
     }
 }
 
-
-async function registerUser(req, res) {
-    const validate = ajv.compile(userRegistrationSchema);
-    const valid = validate(req.body);
-
-    if (!valid) {
-        return res.status(400).json(webResponses.errorResponse('Invalid input', validate.errors));
-    }
-
-    const { email, password, confirmPassword, userLabel, role } = req.body;
-
-    if (password !== confirmPassword) {
-        return res.status(400).json(webResponses.errorResponse('Passwords do not match'));
-    }
+async function getUserById(req, res) {
+    const { userId } = req.params;
 
     try {
-        const newUser = await userService.registerUser(email, password, userLabel, role);
-        res.status(201).json(webResponses.successResponse('User registered successfully', newUser));
+        const user = await userService.getUserById(parseInt(userId));
+        if (!user) return res.status(404).json(webResponses.errorResponse('User not found'));
+        res.status(200).json(webResponses.successResponse('User fetched successfully', user));
     } catch (error) {
         console.error(error);
-        res.status(500).json(webResponses.errorResponse('Failed to register user'));
+        res.status(500).json(webResponses.errorResponse('Failed to fetch user'));
     }
 }
 
+async function updateUser(req, res) {
+    const { userId } = req.params;
+    const data = req.body;
 
-async function loginUser(req, res) {
-    const { email, password } = req.body;
     try {
-        const { accessToken, refreshToken, user } = await userService.loginUser(email, password);
-
-        // Send refresh token as HTTP-only cookie
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-        res.status(200).json(webResponses.successResponse('User logged in successfully', { accessToken, user }));
+        const updatedUser = await userService.updateUser(parseInt(userId), data);
+        res.status(200).json(webResponses.successResponse('User updated successfully', updatedUser));
     } catch (error) {
         console.error(error);
-        res.status(400).json(webResponses.errorResponse(error.message));
+        res.status(500).json(webResponses.errorResponse('Failed to update user'));
     }
 }
 
-async function refreshAccessToken(req, res) {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-        return res.status(401).json(webResponses.errorResponse('No refresh token provided'));
-    }
+async function deleteUser(req, res) {
+    const { userId } = req.params;
 
     try {
-        const newAccessToken = await userService.refreshAccessToken(refreshToken);
-        res.status(200).json(webResponses.successResponse('Access token refreshed successfully', { accessToken: newAccessToken }));
+        await userService.deleteUser(parseInt(userId));
+        res.status(200).json(webResponses.successResponse('User deleted successfully'));
     } catch (error) {
         console.error(error);
-        res.status(401).json(webResponses.errorResponse('Invalid refresh token'));
+        res.status(500).json(webResponses.errorResponse('Failed to delete user'));
     }
 }
-
-async function logoutUser(req, res) {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-        return res.status(401).json(webResponses.errorResponse('No refresh token provided'));
-    }
-
-    try {
-        await userService.logoutUser(refreshToken);
-        res.clearCookie('refreshToken');
-        res.status(200).json(webResponses.successResponse('User logged out successfully'));
-    } catch (error) {
-        console.error(error);
-        res.status(400).json(webResponses.errorResponse('Failed to logout user'));
-    }
-}
-
-async function getProfile(req, res) {
-    try {
-        const user = await userService.getUserById(req.user.userId);
-        if (!user) {
-            return res.status(404).json(webResponses.errorResponse('User not found'));
-        }
-        res.json(webResponses.successResponse('User profile fetched successfully', user));
-    } catch (error) {
-        console.error(error);
-        res.status(500).json(webResponses.errorResponse('Failed to fetch user profile'));
-    }
-}
-
 
 module.exports = {
     getAllUsers,
-    registerUser,
-    loginUser,
-    refreshAccessToken,
-    logoutUser,
-    getProfile
+    getUserById,
+    updateUser,
+    deleteUser
 };
