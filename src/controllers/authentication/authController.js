@@ -8,33 +8,54 @@ addFormats(ajv);
 
 
 async function registerUser(req, res) {
+    console.log('Request Body:', req.body);
+  
     const validate = ajv.compile(userRegistrationValidation);
     const valid = validate(req.body);
-
+  
     if (!valid) {
-        return res.status(400).json(webResponses.errorResponse('Invalid input', validate.errors));
+      console.log('Validation Errors:', validate.errors);
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid input',
+        errors: validate.errors
+      });
     }
-
+  
     const { email, password, confirmPassword, userProfile, role = 'MEMBER' } = req.body;
-
+  
     if (password !== confirmPassword) {
-        return res.status(400).json(webResponses.errorResponse('Passwords do not match'));
+      return res.status(400).json({
+        status: 'error',
+        message: 'Passwords do not match'
+      });
     }
-
+  
     try {
-        const newUser = await authService.registerUser(email, password, userProfile, role);
-        res.status(201).json(webResponses.successResponse('User registered successfully', newUser));
+      const newUser = await authService.registerUser(email, password, userProfile, role);
+      res.status(201).json({
+        status: 'success',
+        message: 'User registered successfully',
+        data: newUser
+      });
     } catch (error) {
-        console.error(error);
-
-        if (error.code === 'P2002' && error.meta && error.meta.target === 'User_email_key') {
-            return res.status(400).json(webResponses.errorResponse('Email is already in use'));
-        }
-
-        res.status(500).json(webResponses.errorResponse('Failed to register user', error.message));
+      console.error(error);
+  
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'User_email_key') {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Email is already in use'
+        });
+      }
+  
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to register user',
+        error: error.message
+      });
     }
-}
-
+  }
+  
 
 async function loginUser(req, res) {
     const { email, password } = req.body;
