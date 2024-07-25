@@ -9,6 +9,21 @@ const path = require('path');
 const PORT = process.env.PORT || 3001;
 const main = express();
 
+// Konfigurasi CORS
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'PUT', 'POST', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+main.use(cors(corsOptions));
+
+main.use(bodyParser.json());
+main.use(bodyParser.urlencoded({
+    extended: false
+}));
+main.use(cookieParser());
+
 // Middleware untuk menangani unggahan file
 main.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
@@ -39,13 +54,6 @@ const productRoutes = require('./route/myaRoute/productRoute');
 //mybeautica routes
 const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
 
-
-main.use(cors());
-main.use(bodyParser.json());
-main.use(bodyParser.urlencoded({
-    extended: false
-}));
-main.use(cookieParser());
 
 
 
