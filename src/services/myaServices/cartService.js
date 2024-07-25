@@ -20,7 +20,7 @@ class CartService {
     async deleteCartItem(cartId) {
         return await database.cart.delete({
             where: {
-                id: cartId
+                cartId: cartId
             }
         });
     }
@@ -29,7 +29,7 @@ class CartService {
     async updateCartItem(cartId, quantity) {
         return await database.cart.update({
             where: {
-                id: cartId
+                cartId: cartId
             },
             data: {
                 quantity: quantity
@@ -58,7 +58,7 @@ class CartService {
         if (existingCart) {
             return await database.cart.update({
                 where: {
-                    id: existingCart.id
+                    cartId: existingCart.cartId
                 },
                 data: {
                     quantity: {

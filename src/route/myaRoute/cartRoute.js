@@ -19,12 +19,12 @@ router.use((req, res, next) => {
     next();
 });
 
-router.post('/add/:productId', cartController.addToCart);
+router.post('/add/:productId', authMiddleware.verifyToken, cartController.addToCart);
 //get cart item based on user id
 router.get('/', authMiddleware.verifyToken, cartController.getAllCartItems);
 router.delete('/delete/:cartId', cartController.deleteCartItem);
-router.put('/update/:cartId', cartController.updateCartItem);
-router.delete('/clear/:userId', cartController.clearCart);
+router.put('/update/:cartId', authMiddleware.verifyToken, cartController.updateCartItem);
+router.delete('/clear/:userId', authMiddleware.verifyToken, cartController.clearCart);
 
 module.exports = router;
 

@@ -1,4 +1,5 @@
 const Ajv = require("ajv");
+
 const ajv = new Ajv();
 
 const addToCartSchema = {
@@ -23,4 +24,6 @@ const updateCartItemSchema = {
 module.exports = {
     addToCartSchema,
     updateCartItemSchema,
+    bulkUpdateCartItemSchema,
+    
 };
