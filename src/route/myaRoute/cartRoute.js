@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const productController = require(`../../controllers/myaController/productController`);
+const cartController = require('../../controllers/myaController/cartController');
+const authMiddleware = require('../../middlewares/authMiddleware');
+
 
 router.use((req, res, next) => {
     const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
@@ -17,10 +19,13 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/', productController.getAllProduct);
-router.get('/:id', productController.getProductById);
-router.post('/', productController.createProduct);
-router.put('/:id', productController.updateProduct);
-router.delete('/:id', productController.deleteProduct);
+router.post('/add/:productId', cartController.addToCart);
+//get cart item based on user id
+router.get('/', authMiddleware.verifyToken, cartController.getAllCartItems);
+router.delete('/delete/:cartId', cartController.deleteCartItem);
+router.put('/update/:cartId', cartController.updateCartItem);
+router.delete('/clear/:userId', cartController.clearCart);
 
 module.exports = router;
+
+
