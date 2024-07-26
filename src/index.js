@@ -50,11 +50,22 @@ const materiRoutes = require('./route/myAcademyRoute/materialsRoute');
 //mya routes
 const myaRoutes = '/myg/api/mya';
 const productRoutes = require('./route/myaRoute/productRoute');
+const cartRoutes = require('./route/myaRoute/cartRoute');
 
 //mybeautica routes
 const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
 
-
+const corstOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true,
+    optionSuccessStatus: 200
+}
+main.use(cors(corstOptions));
+main.use(bodyParser.json());
+main.use(bodyParser.urlencoded({
+    extended: false
+}));
+main.use(cookieParser());
 
 
 //use global routes
@@ -74,6 +85,7 @@ main.use('/myg/api/materi', materiRoutes);
 
 //use mya routes
 main.use(myaRoutes + '/produk', productRoutes);
+main.use(myaRoutes + '/keranjang', cartRoutes);
 
 //use mybeautica routes
 main.use('/myg/api/layanan', layananRoutes);

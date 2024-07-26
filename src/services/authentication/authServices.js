@@ -43,7 +43,7 @@ async function loginUser(email, password) {
     if (!validPassword) {
         throw new Error('Invalid password');
     }
-
+    console.log(process.env.JWT_SECRET);
     const accessToken = jwt.sign({ userId: user.userId, email: user.email }, process.env.JWT_SECRET, { expiresIn: '15m' });
     const refreshToken = jwt.sign({ userId: user.userId, email: user.email }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
