@@ -102,7 +102,7 @@ model Training {
   dateFinish   DateTime?
   address      String?
   price        Int?
-  embedMaps    String?
+  embedMaps    String? @db.Text
   linkMaps     String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now())
@@ -118,6 +118,7 @@ model Material {
   type             MaterialType
   membershipLevel  MembershipLevel
   banner           String
+  brosur           String?
   formRegistration String
   ebook            String
   youtubeVideo     String
@@ -151,7 +152,7 @@ model Exam {
   dateFinish  DateTime
   address     String?
   price        Int?
-  embedMaps    String?
+  embedMaps    String? @db.Text
   linkMaps     String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now())
