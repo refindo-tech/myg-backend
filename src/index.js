@@ -69,7 +69,6 @@ main.use(bodyParser.urlencoded({
 main.use(cookieParser());
 
 
-
 //use global routes
 main.use('/myg/api/', testimoniRoutes);
 
