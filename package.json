@@ -36,8 +36,8 @@
     "schema": "src/models/myg_project.prisma"
   },
   "devDependencies": {
-    "@prisma/client": "^5.16.1",
+    "@prisma/client": "^5.17.0",
     "nodemon": "^3.1.4",
-    "prisma": "^5.16.1"
+    "prisma": "^5.17.0"
   }
 }
