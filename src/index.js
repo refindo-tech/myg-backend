@@ -51,6 +51,7 @@ const materiRoutes = require('./route/myAcademyRoute/materialsRoute');
 const myaRoutes = '/myg/api/mya';
 const productRoutes = require('./route/myaRoute/productRoute');
 const cartRoutes = require('./route/myaRoute/cartRoute');
+const cartItemRoutes = require('./route/myaRoute/cartItemRoute');
 
 //mybeautica routes
 const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
@@ -87,6 +88,7 @@ main.use('/myg/api/materi', materiRoutes);
 //use mya routes
 main.use(myaRoutes + '/produk', productRoutes);
 main.use(myaRoutes + '/keranjang', cartRoutes);
+main.use(myaRoutes + '/keranjang', cartItemRoutes);
 
 //use mybeautica routes
 main.use('/myg/api/layanan', layananRoutes);
