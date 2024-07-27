@@ -10,7 +10,8 @@ const userRoutes = require('./route/authentication/userRoute');
 const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
 const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
 const materiRoutes = require('./route/myAcademyRoute/materialsRoute');
-
+const trainingRoutes = require('./route/myAcademyRoute/trainingRoutes')
+const examRoutes = require('./route/myAcademyRoute/examRoutes')
 
 const PORT = process.env.PORT || 3001;
 const main = express();
@@ -27,6 +28,8 @@ main.use('/myg/api', userRoutes);
 main.use('/myg/api/layanan', layananRoutes);
 main.use('/myg/api/', testimoniRoutes);
 main.use('/myg/api/materi', materiRoutes);
+main.use('/myg/api/training', trainingRoutes);
+main.use('/myg/api/exam', examRoutes);
 
 main.listen(PORT, () => {
     console.log('Server is running! port: ' + PORT);

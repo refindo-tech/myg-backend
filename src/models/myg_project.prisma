@@ -8,32 +8,32 @@ datasource db {
 }
 
 model User {
-  userId            Int                 @id @default(autoincrement())
-  email             String              @unique
-  password          String
-  userLabel         UserLabel           @default(SAHABAT_MY_ACADEMI)
-  role              UserRole
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @default(now())
-  
-  refreshToken      RefreshToken[]
-  userProfiles      UserProfile[]
-  socialMedias      SocialMedia[]
-  userCoins         UserCoin[]
-  notifications     Notification[]
-  materials         Material[]          @relation("MaterialUploader")
-  trainings         Training[]          @relation("TrainingUploader")
-  messagesSent      Message[]           @relation("MessageSender")
-  messagesReceived  Message[]           @relation("MessageReceiver")
-  exams             Exam[]              @relation("ExamCreator")
-  examResults       ExamResult[]
-  products          Product[]           @relation("ProductUploader")
-  orders            Order[]
-  carts             Cart[]
-  wishlists         Wishlist[]
-  guidelines        Guideline[]         @relation("GuidelineUploader")
+  userId    Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  userLabel UserLabel @default(SAHABAT_MY_ACADEMI)
+  role      UserRole
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+
+  refreshToken       RefreshToken[]
+  userProfiles       UserProfile[]
+  socialMedias       SocialMedia[]
+  userCoins          UserCoin[]
+  notifications      Notification[]
+  materials          Material[]          @relation("MaterialUploader")
+  trainings          Training[]          @relation("TrainingUploader")
+  messagesSent       Message[]           @relation("MessageSender")
+  messagesReceived   Message[]           @relation("MessageReceiver")
+  exams              Exam[]              @relation("ExamCreator")
+  examResults        ExamResult[]
+  products           Product[]           @relation("ProductUploader")
+  orders             Order[]
+  carts              Cart[]
+  wishlists          Wishlist[]
+  guidelines         Guideline[]         @relation("GuidelineUploader")
   beautyAppointments BeautyAppointment[]
-  reviews           Review[]
+  reviews            Review[]
 }
 
 model RefreshToken {
@@ -46,13 +46,13 @@ model RefreshToken {
 }
 
 model Admin {
-  adminId    Int      @id @default(autoincrement())
-  name       String
-  email      String   @unique
-  password   String
+  adminId     Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  password    String
   permissions String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
 }
 
 model UserProfile {
@@ -98,6 +98,12 @@ model Training {
   trainingName String
   description  String
   uploadedBy   Int
+  dateStart    DateTime?
+  dateFinish   DateTime?
+  address      String?
+  price        Int?
+  embedMaps    String?
+  linkMaps     String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now())
   materials    Material[]
@@ -136,15 +142,21 @@ model Message {
 }
 
 model Exam {
-  examId     Int          @id @default(autoincrement())
-  title      String
+  examId      Int          @id @default(autoincrement())
+  title       String
   description String
-  type       ExamType
-  createdBy  Int
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @default(now())
-  questions  Question[]
-  user       User         @relation("ExamCreator", fields: [createdBy], references: [userId])
+  type        ExamType
+  createdBy   Int
+  dateStart   DateTime
+  dateFinish  DateTime
+  address     String?
+  price        Int?
+  embedMaps    String?
+  linkMaps     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now())
+  questions   Question[]
+  user        User         @relation("ExamCreator", fields: [createdBy], references: [userId])
   examResults ExamResult[]
 }
 
@@ -247,19 +259,19 @@ model Guideline {
 }
 
 model BeautyService {
-  serviceId         Int                 @id @default(autoincrement())
-  title             String
-  description       String
-  price             Decimal
-  imageUrl          String?             
-  viewCount         Int                 @default(0)
+  serviceId   Int     @id @default(autoincrement())
+  title       String
+  description String
+  price       Decimal
+  imageUrl    String?
+  viewCount   Int     @default(0)
 
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @default(now())
-  availability      Availability[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  availability       Availability[]
   beautyAppointments BeautyAppointment[]
-  reviews           Review[]
-} 
+  reviews            Review[]
+}
 
 model BeautyAppointment {
   appointmentId   Int               @id @default(autoincrement())

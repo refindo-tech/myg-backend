@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const materialsController = require('../../controllers/myAcademyController/materialController');
+const examController = require('../../controllers/myAcademyController/examController');
 
 
 // Middleware untuk menambahkan header CORS
@@ -11,7 +11,8 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/', materialsController.getAllMaterials);
-router.get('/:idTraining', materialsController.getDetailMaterial)
+router.get('/recommendation/:limit', examController.getAllExamComingSoon);
+router.get('/past/:limit', examController.getAllExamPast);
+router.get('/detail/:idExam', examController.getDetailExam);
 
 module.exports = router;
