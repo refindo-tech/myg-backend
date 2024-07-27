@@ -44,6 +44,7 @@ async function getDetailTraining(req, res){
                     embedMaps:detailTraining.embedMaps,
                     price:detailTraining.price,
                     linkMaps:detailTraining.linkMaps,
+                    materials:detailTraining.materials,
                     type:type,
                 }
                 return res.status(200).json(webResponses.successResponse('Validate Success',formattedResponse));
@@ -60,6 +61,7 @@ async function getDetailTraining(req, res){
                     embedMaps:detailTraining.embedMaps,
                     price:detailTraining.price,
                     linkMaps:detailTraining.linkMaps,
+                    materials:detailTraining.materials,
                     type:type,
                 }
                 return res.status(200).json(webResponses.successResponse('Validate Success',formattedResponse));

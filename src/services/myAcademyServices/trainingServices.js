@@ -54,6 +54,9 @@ async function detailTraining (idTraining){
     return database.training.findUnique({
         where:{
             trainingId:idTraining
+        },
+        include:{
+            materials:true
         }
     })
 }
