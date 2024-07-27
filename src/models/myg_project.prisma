@@ -176,7 +176,6 @@ model Product {
   productId     Int            @id @default(autoincrement())
   name          String
   description   String
-  priceId       Int
   stock         Int
   productImages Json
   type          ProductType

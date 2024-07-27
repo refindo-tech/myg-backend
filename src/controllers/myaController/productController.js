@@ -8,7 +8,7 @@ const ajv = new Ajv();
 async function getAllProduct(req, res) {
     try {
         const limit = parseInt(req.query.limit) || 10;
-        const product = await productService.getAllProduct({ limit });
+        const product = await productService.getAllProduct(limit);
         return res.status(200).json(webResponses.successResponse(product));
     } catch (error) {
         return res.status(500).json(webResponses.errorResponse(error.message));
@@ -30,12 +30,13 @@ async function getProductById(req, res) {
 
 async function createProduct(req, res) {
     try {
+        const { userId } = req.user;
         const { body } = req;
         const valid = ajv.validate(createProductSchema, body);
         if (!valid) {
             return res.status(400).json(webResponses.errorResponse(ajv.errors));
         }
-        const product = await productService.createProduct(body);
+        const product = await productService.createProduct(body, userId);
         return res.status(201).json(webResponses.successResponse(product));
     } catch (error) {
         return res.status(500).json(webResponses.errorResponse(error.message));
