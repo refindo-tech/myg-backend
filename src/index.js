@@ -67,6 +67,11 @@ main.use('/uploads', (req, res, next) => {
 const detailPembelianRoutes = require('./route/detailProfile/purchaseRoute');
 const detailAcaraRoutes = require('./route/detailProfile/eventRoute');
 
+//myacademy routes
+const materiRoutes = require('./route/myAcademyRoute/materialsRoute');
+const trainingRoutes = require('./route/myAcademyRoute/trainingRoutes')
+const examRoutes = require('./route/myAcademyRoute/examRoutes')
+
 //mya routes
 const myaRoutes = '/myg/api/mya';
 const productRoutes = require('./route/myaRoute/productRoute');
