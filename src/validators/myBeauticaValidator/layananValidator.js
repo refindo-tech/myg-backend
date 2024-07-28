@@ -7,7 +7,7 @@ const createLayananSchema = {
         imageUrl: { type: 'string', nullable: true },
         viewCount: { type: 'number', nullable: true },
     },
-    required: ['title', 'description', 'price', 'uploadedBy'],
+    required: ['title', 'description', 'price'],
     additionalProperties: false,
 };
 

@@ -8,13 +8,13 @@ datasource db {
 }
 
 model User {
-  userId    Int       @id @default(autoincrement())
-  email     String    @unique
+  userId    Int        @id @default(autoincrement())
+  email     String     @unique
   password  String
-  userLabel UserLabel @default(SAHABAT_MY_ACADEMI)
-  role      UserRole
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
+  userLabel UserLabel?
+  role      UserRole   @default(MEMBER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
 
   refreshToken       RefreshToken[]
   userProfiles       UserProfile[]
@@ -62,7 +62,8 @@ model UserProfile {
   studioName     String
   address        String
   phoneNumber    String
-  profilePicture String
+  profilePicture String?
+  socialMedia    String
   birthdate      DateTime
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now())
@@ -102,7 +103,7 @@ model Training {
   dateFinish   DateTime?
   address      String?
   price        Int?
-  embedMaps    String? @db.Text
+  embedMaps    String?    @db.Text
   linkMaps     String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now())
@@ -151,9 +152,11 @@ model Exam {
   dateStart   DateTime
   dateFinish  DateTime
   address     String?
-  price        Int?
-  embedMaps    String? @db.Text
-  linkMaps     String?
+  price       Int?
+  embedMaps   String?      @db.Text
+  linkMaps    String?
+  brosur      String?
+  banner      String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now())
   questions   Question[]

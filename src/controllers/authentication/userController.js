@@ -1,111 +1,87 @@
-webResponses = require('../../helpers/web/webResponses');
-const userService = require('../../services/authentication/userService');
-const { userRegistrationSchema } = require('../../validators/userValidator');
-const Ajv = require('ajv');
-const addFormats = require('ajv-formats');
-const ajv = new Ajv();
-addFormats(ajv);
+const webResponses = require('../../helpers/web/webResponses');
+const userService = require('../../services/authentication/userServices');
+const multer = require('multer');
+const path = require('path');
+
+// Setup Multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname)); // Append the file extension
+    }
+});
+
+const upload = multer({ storage: storage });
+
 
 async function getAllUsers(req, res) {
     try {
         const users = await userService.getAllUsers();
-        res.json(webResponses.successResponse('Users fetched successfully', users));
+        res.status(200).json(webResponses.successResponse('Users fetched successfully', users));
     } catch (error) {
         console.error(error);
         res.status(500).json(webResponses.errorResponse('Failed to fetch users'));
     }
 }
 
-
-async function registerUser(req, res) {
-    const validate = ajv.compile(userRegistrationSchema);
-    const valid = validate(req.body);
-
-    if (!valid) {
-        return res.status(400).json(webResponses.errorResponse('Invalid input', validate.errors));
-    }
-
-    const { email, password, confirmPassword, userLabel, role } = req.body;
-
-    if (password !== confirmPassword) {
-        return res.status(400).json(webResponses.errorResponse('Passwords do not match'));
-    }
+async function getUserById(req, res) {
+    const { userId } = req.params;
 
     try {
-        const newUser = await userService.registerUser(email, password, userLabel, role);
-        res.status(201).json(webResponses.successResponse('User registered successfully', newUser));
+        const user = await userService.getUserById(parseInt(userId));
+        if (!user) return res.status(404).json(webResponses.errorResponse('User not found'));
+        res.status(200).json(webResponses.successResponse('User fetched successfully', user));
     } catch (error) {
         console.error(error);
-        res.status(500).json(webResponses.errorResponse('Failed to register user'));
+        res.status(500).json(webResponses.errorResponse('Failed to fetch user'));
     }
 }
 
+async function updateUser(req, res) {
+    const { userId } = req.params;
+    const userProfile = req.body;
+    const filePaths = {};
 
-async function loginUser(req, res) {
-    const { email, password } = req.body;
-    try {
-        const { accessToken, refreshToken, user } = await userService.loginUser(email, password);
-
-        // Send refresh token as HTTP-only cookie
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-        res.status(200).json(webResponses.successResponse('User logged in successfully', { accessToken, user }));
-    } catch (error) {
-        console.error(error);
-        res.status(400).json(webResponses.errorResponse(error.message));
+    if (req.files && req.files['profilePicture']) {
+        filePaths.profilePicture = `${req.protocol}://${req.get('host')}/uploads/${req.files['profilePicture'][0].filename}`;
     }
-}
-
-async function refreshAccessToken(req, res) {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-        return res.status(401).json(webResponses.errorResponse('No refresh token provided'));
+    if (req.files && req.files['ktpPicture']) {
+        filePaths.ktpPicture = `${req.protocol}://${req.get('host')}/uploads/${req.files['ktpPicture'][0].filename}`;
+    }
+    if (req.files && req.files['studioLogo']) {
+        filePaths.studioLogo = `${req.protocol}://${req.get('host')}/uploads/${req.files['studioLogo'][0].filename}`;
     }
 
     try {
-        const newAccessToken = await userService.refreshAccessToken(refreshToken);
-        res.status(200).json(webResponses.successResponse('Access token refreshed successfully', { accessToken: newAccessToken }));
+        const updatedUser = await userService.updateUser(parseInt(userId), userProfile, filePaths);
+        res.status(200).json(webResponses.successResponse('User updated successfully', updatedUser));
     } catch (error) {
         console.error(error);
-        res.status(401).json(webResponses.errorResponse('Invalid refresh token'));
+        res.status(500).json(webResponses.errorResponse('Failed to update user'));
     }
 }
 
-async function logoutUser(req, res) {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-        return res.status(401).json(webResponses.errorResponse('No refresh token provided'));
-    }
+async function deleteUser(req, res) {
+    const { userId } = req.params;
 
     try {
-        await userService.logoutUser(refreshToken);
-        res.clearCookie('refreshToken');
-        res.status(200).json(webResponses.successResponse('User logged out successfully'));
+        await userService.deleteUser(parseInt(userId));
+        res.status(200).json(webResponses.successResponse('User deleted successfully'));
     } catch (error) {
         console.error(error);
-        res.status(400).json(webResponses.errorResponse('Failed to logout user'));
+        res.status(500).json(webResponses.errorResponse('Failed to delete user'));
     }
 }
-
-async function getProfile(req, res) {
-    try {
-        const user = await userService.getUserById(req.user.userId);
-        if (!user) {
-            return res.status(404).json(webResponses.errorResponse('User not found'));
-        }
-        res.json(webResponses.successResponse('User profile fetched successfully', user));
-    } catch (error) {
-        console.error(error);
-        res.status(500).json(webResponses.errorResponse('Failed to fetch user profile'));
-    }
-}
-
 
 module.exports = {
     getAllUsers,
-    registerUser,
-    loginUser,
-    refreshAccessToken,
-    logoutUser,
-    getProfile
+    getUserById,
+    updateUser: [upload.fields([
+        { name: 'profilePicture', maxCount: 1 },
+        { name: 'ktpPicture', maxCount: 1 },
+        { name: 'studioLogo', maxCount: 1 }
+    ]), updateUser],
+    deleteUser
 };

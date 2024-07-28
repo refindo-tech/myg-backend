@@ -1,24 +1,36 @@
-const { UserLabel } = require('@prisma/client');
 const { database } = require('../../helpers/config/db');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 
 
-async function getAllUsers() {
-    return await database.user.findMany();
-}
-
-async function registerUser( email, password, UserLabel, role ) {
+async function registerUser(email, password, userProfile, role = 'MEMBER') {
     const hashedPassword = await argon2.hash(password);
     return await database.user.create({
         data: {
             email,
             password: hashedPassword,
-            userLabel: UserLabel,
             role,
             createdAt: new Date(),
             updatedAt: new Date(),
+            userProfiles: {
+                create: {
+                    fullName: userProfile.fullName,
+                    phoneNumber: userProfile.phoneNumber,
+                    birthdate: new Date(userProfile.birthdate),
+                    socialMedia: userProfile.socialMedia,
+                    address: userProfile.address,
+                    profilePicture: userProfile.profilePicture || null,
+                    studioName: userProfile.studioName || null,
+                    // ktpPicture: userProfile.ktpPicture || null,
+                    // studioLogo: userProfile.studioLogo || null,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }
+            }
         },
+        include: {
+            userProfiles: true
+        }
     });
 }
 
@@ -31,11 +43,11 @@ async function loginUser(email, password) {
     if (!validPassword) {
         throw new Error('Invalid password');
     }
-
+    console.log(process.env.JWT_SECRET);
     const accessToken = jwt.sign({ userId: user.userId, email: user.email }, process.env.JWT_SECRET, { expiresIn: '15m' });
     const refreshToken = jwt.sign({ userId: user.userId, email: user.email }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
-    // Store refresh token in database
+    // Store tokens in database
     await database.refreshToken.create({
         data: {
             token: refreshToken,
@@ -75,16 +87,29 @@ async function logoutUser(refreshToken) {
     }
 }
 
-async function getUserById(userId) {
-    return await database.user.findUnique({ where: { userId } });
+async function getUserProfile(userId) {
+    const user = await database.user.findUnique({
+        where: { userId },
+        include: {
+            userProfiles: {
+                select: {
+                    profilePicture: true
+                }
+            }
+        }
+    });
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    return user;
 }
 
-
 module.exports = {
-    getAllUsers,
     registerUser,
     loginUser,
     refreshAccessToken,
     logoutUser,
-    getUserById
+    getUserProfile
 };

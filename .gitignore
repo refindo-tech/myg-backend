@@ -9,3 +9,5 @@ src/models/migrations/20240630152513_/migration.sql
 src/models/migrations/
 
 package-lock.json
+
+uploads/
