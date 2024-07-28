@@ -102,7 +102,7 @@ model Training {
   dateFinish   DateTime?
   address      String?
   price        Int?
-  embedMaps    String? @db.Text
+  embedMaps    String?    @db.Text
   linkMaps     String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now())
@@ -151,9 +151,11 @@ model Exam {
   dateStart   DateTime
   dateFinish  DateTime
   address     String?
-  price        Int?
-  embedMaps    String? @db.Text
-  linkMaps     String?
+  price       Int?
+  embedMaps   String?      @db.Text
+  linkMaps    String?
+  banner      String?
+  brosur      String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now())
   questions   Question[]

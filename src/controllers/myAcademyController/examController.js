@@ -43,6 +43,8 @@ async function getDetailExam(req, res){
                     address:detailExam.address,
                     embedMaps:detailExam.embedMaps,
                     price:detailExam.price,
+                    brosur:detailExam.brosur,
+                    banner:detailExam.banner,
                     linkMaps:detailExam.linkMaps,
                     type:type,
                 }
@@ -60,6 +62,8 @@ async function getDetailExam(req, res){
                     embedMaps:detailExam.embedMaps,
                     price:detailExam.price,
                     linkMaps:detailExam.linkMaps,
+                    brosur:detailExam.brosur,
+                    banner:detailExam.banner,
                     type:type,
                 }
                 return res.status(200).json(webResponses.successResponse('Validate Success',formattedResponse));
