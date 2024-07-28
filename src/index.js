@@ -33,19 +33,39 @@ main.use('/uploads', (req, res, next) => {
     next();
 });
 
-// global route
-const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
 
 //auth routes
 const authRoutes = require('./route/authentication/authRoute');
 const userRoutes = require('./route/authentication/userRoute');
+const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
+const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
+const materiRoutes = require('./route/myAcademyRoute/materialsRoute');
+const trainingRoutes = require('./route/myAcademyRoute/trainingRoutes')
+const examRoutes = require('./route/myAcademyRoute/examRoutes')
+
+main.use(cors(corsOptions));
+
+main.use(bodyParser.json());
+main.use(bodyParser.urlencoded({
+    extended: false
+}));
+main.use(cookieParser());
+
+// Middleware untuk menangani unggahan file
+main.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Middleware logging untuk permintaan ke rute statis (opsional, untuk debugging)
+main.use('/uploads', (req, res, next) => {
+    console.log(`Request to static file: ${req.path}`);
+    next();
+});
+
+
+//auth routes
 
 //detail profile routes
 const detailPembelianRoutes = require('./route/detailProfile/purchaseRoute');
 const detailAcaraRoutes = require('./route/detailProfile/eventRoute');
-
-//myacademy routes
-const materiRoutes = require('./route/myAcademyRoute/materialsRoute');
 
 //mya routes
 const myaRoutes = '/myg/api/mya';
@@ -55,7 +75,6 @@ const cartItemRoutes = require('./route/myaRoute/cartItemRoute');
 const orderRoutes = require('./route/myaRoute/orderRoute');
 
 //mybeautica routes
-const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
 
 const corstOptions = {
     origin: 'http://localhost:3000',
@@ -84,6 +103,8 @@ main.use('/myg/api/detail-profile', detailAcaraRoutes);
 
 //use myacademy routes
 main.use('/myg/api/materi', materiRoutes);
+main.use('/myg/api/training', trainingRoutes);
+main.use('/myg/api/exam', examRoutes);
 
 //use mya routes
 main.use(myaRoutes + '/produk', productRoutes);

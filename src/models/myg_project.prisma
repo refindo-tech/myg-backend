@@ -59,13 +59,11 @@ model UserProfile {
   profileId      Int      @id @default(autoincrement())
   userId         Int
   fullName       String
+  studioName     String
   address        String
   phoneNumber    String
-  socialMedia    String
   profilePicture String?
-  studioName     String?
-  ktpPicture     String?
-  studioLogo     String?
+  socialMedia    String
   birthdate      DateTime
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now())
@@ -101,7 +99,12 @@ model Training {
   trainingName String
   description  String
   uploadedBy   Int
-  eventTime    DateTime
+  dateStart    DateTime?
+  dateFinish   DateTime?
+  address      String?
+  price        Int?
+  embedMaps    String?    @db.Text
+  linkMaps     String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now())
   materials    Material[]
@@ -116,6 +119,7 @@ model Material {
   type             MaterialType
   membershipLevel  MembershipLevel
   banner           String
+  brosur           String?
   formRegistration String
   ebook            String
   youtubeVideo     String
@@ -145,6 +149,14 @@ model Exam {
   description String
   type        ExamType
   createdBy   Int
+  dateStart   DateTime
+  dateFinish  DateTime
+  address     String?
+  price       Int?
+  embedMaps   String?      @db.Text
+  linkMaps    String?
+  brosur      String?
+  banner      String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now())
   questions   Question[]
@@ -202,7 +214,6 @@ model Order {
   orderId     Int         @id @default(autoincrement())
   userId      Int
   totalAmount Decimal
-  code        String      @unique
   status      OrderStatus
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @default(now())
