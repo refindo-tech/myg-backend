@@ -1,7 +1,8 @@
 const express = require('express');
-const testimoniController = require('../../controllers/myBeauticaController/testimoniController');
-
 const router = express.Router();
+const cartController = require('../../controllers/myaController/cartController');
+const authMiddleware = require('../../middlewares/authMiddleware');
+
 
 router.use((req, res, next) => {
     const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
@@ -18,10 +19,13 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/testimonials', testimoniController.getAllTestimonials);
-router.get('/testimonials/:id', testimoniController.getTestimonialById);
-router.post('/testimonials', testimoniController.createTestimonial);
-router.put('/testimonials/:id', testimoniController.updateTestimonial);
-router.delete('/testimonials/:id', testimoniController.deleteTestimonial);
+router.post('/add/:productId', cartController.addToCart);
+//get cart item based on user id
+router.get('/', authMiddleware.verifyToken, cartController.getAllCartItems);
+router.delete('/delete/:cartId', cartController.deleteCartItem);
+router.put('/update/:cartId', cartController.updateCartItem);
+router.delete('/clear/:userId', cartController.clearCart);
 
 module.exports = router;
+
+

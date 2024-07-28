@@ -1,7 +1,6 @@
 const express = require('express');
-const testimoniController = require('../../controllers/myBeauticaController/testimoniController');
-
 const router = express.Router();
+const productController = require(`../../controllers/myaController/productController`);
 
 router.use((req, res, next) => {
     const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
@@ -18,10 +17,10 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/testimonials', testimoniController.getAllTestimonials);
-router.get('/testimonials/:id', testimoniController.getTestimonialById);
-router.post('/testimonials', testimoniController.createTestimonial);
-router.put('/testimonials/:id', testimoniController.updateTestimonial);
-router.delete('/testimonials/:id', testimoniController.deleteTestimonial);
+router.get('/', productController.getAllProduct);
+router.get('/:id', productController.getProductById);
+router.post('/', productController.createProduct);
+router.put('/:id', productController.updateProduct);
+router.delete('/:id', productController.deleteProduct);
 
 module.exports = router;
