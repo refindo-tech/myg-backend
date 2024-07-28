@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const cartController = require('../../controllers/myaController/cartController');
+const orderController = require('../../controllers/myaController/orderController');
 const authMiddleware = require('../../middlewares/authMiddleware');
 
 
@@ -19,8 +19,8 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/', authMiddleware.verifyToken, cartController.getCarts);
-router.delete('/clear/', authMiddleware.verifyToken, cartController.clearCart);
+router.get('/', authMiddleware.verifyToken, orderController.getOrders);
+router.post('/', authMiddleware.verifyToken, orderController.createOrder);
 
 module.exports = router;
 

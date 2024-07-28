@@ -28,8 +28,8 @@ model User {
   exams              Exam[]              @relation("ExamCreator")
   examResults        ExamResult[]
   products           Product[]           @relation("ProductUploader")
+  cart               Cart?
   orders             Order[]
-  carts              Cart[]
   wishlists          Wishlist[]
   guidelines         Guideline[]         @relation("GuidelineUploader")
   beautyAppointments BeautyAppointment[]
@@ -176,7 +176,6 @@ model Product {
   productId     Int            @id @default(autoincrement())
   name          String
   description   String
-  priceId       Int
   stock         Int
   productImages Json
   type          ProductType
@@ -186,7 +185,7 @@ model Product {
   price         ProductPrice[]
   user          User           @relation("ProductUploader", fields: [uploadedBy], references: [userId])
   orderItems    OrderItem[]
-  cart          Cart[]
+  cartItems     CartItem[]
   wishlist      Wishlist[]
   guideline     Guideline[]
 }
@@ -223,11 +222,20 @@ model OrderItem {
 
 model Cart {
   cartId    Int     @id @default(autoincrement())
-  userId    Int
-  productId Int
-  quantity  Int
+  userId    Int     @unique
   user      User    @relation(fields: [userId], references: [userId])
-  product   Product @relation(fields: [productId], references: [productId])
+  cartItems CartItem[]
+}
+
+model CartItem {
+  cartItemId Int     @id @default(autoincrement())
+  cartId     Int
+  productId  Int
+  quantity   Int
+  cart       Cart    @relation(fields: [cartId], references: [cartId])
+  product    Product @relation(fields: [productId], references: [productId])
+
+  @@unique([cartId, productId])
 }
 
 model Wishlist {

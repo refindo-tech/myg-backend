@@ -1,4 +1,5 @@
 const Ajv = require("ajv");
+
 const ajv = new Ajv();
 
 const addToCartSchema = {
@@ -20,7 +21,22 @@ const updateCartItemSchema = {
     additionalProperties: false,
 };
 
+const bulkUpdateCartItemsSchema = {
+    type: "array",
+    items: {
+        type: "object",
+        properties: {
+            productId: { type: "integer" },
+            quantity: { type: "integer", minimum: 1 },
+        },
+        required: ["productId", "quantity"],
+        additionalProperties: false,
+    },
+};
+
 module.exports = {
     addToCartSchema,
     updateCartItemSchema,
+    bulkUpdateCartItemsSchema,
+    
 };
