@@ -1,5 +1,10 @@
 const OrderService = require('../../services/myaServices/orderService');
 const webResponses = require('../../helpers/web/webResponses');
+const xenditConfig = require('../../helpers/config/xenditConfig');
+
+//xendit
+const { Invoice } = xenditConfig;
+const invoice = new Invoice();
 
 class OrderController {
 
@@ -18,6 +23,9 @@ class OrderController {
             const { userId } = req.user;
 
             const order = await OrderService.createOrder(userId);
+
+            //Xendit API call to create payment
+
             return res.status(201).json(webResponses.successResponse(order));
         } catch (error) {
             return res.status(500).json(webResponses.errorResponse(error.message));

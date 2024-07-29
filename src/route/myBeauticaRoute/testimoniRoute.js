@@ -4,7 +4,7 @@ const testimoniController = require('../../controllers/myBeauticaController/test
 const router = express.Router();
 
 router.use((req, res, next) => {
-    const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000','http://localhost:3001'];
+    const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000','http://localhost:3001', 'http://127.0.0.1:3001'];
     const origin = req.headers.origin;
 
     if (allowedOrigins.includes(origin)) {

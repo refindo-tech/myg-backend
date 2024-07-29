@@ -11,7 +11,17 @@ class CartService {
             },
             include:
             {
-                cartItems: true
+                cartItems: {
+                    include: {
+                        product: {
+                            select: {
+                                name: true,
+                                price: true,
+                                productImages: true
+                            }
+                        }
+                    }
+                }
             }
         });
     }

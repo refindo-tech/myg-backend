@@ -19,7 +19,7 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/', authMiddleware.verifyToken, cartController.getCarts);
+router.get('/', authMiddleware.authMiddleware, cartController.getCarts);
 router.delete('/clear/', authMiddleware.verifyToken, cartController.clearCart);
 
 module.exports = router;
