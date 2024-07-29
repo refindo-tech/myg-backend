@@ -27,19 +27,9 @@ async function getTestimonialById(id) {
 }
 
 async function createTestimonial(data) {
-    // Validasi serviceId
-    const serviceExists = await database.beautyService.findUnique({
-        where: { serviceId: data.serviceId },
-    });
-
-    if (!serviceExists) {
-        throw new Error('Invalid serviceId. The specified service does not exist.');
-    }
-
     return await database.review.create({
         data: {
             userId: data.userId,
-            serviceId: data.serviceId,
             comment: data.comment,
             createdAt: new Date(),
             updatedAt: new Date(),

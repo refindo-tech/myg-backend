@@ -1,6 +1,6 @@
-const testimoniService = require('../../services/myBeauticaServices/testimoniServices');
+const testimoniService = require('../../services/testimoniServices/testimoniServices');
 const webResponses = require('../../helpers/web/webResponses');
-const { createTestimonialSchema, updateTestimonialSchema } = require('../../validators/myBeauticaValidator/testimoniValidator');
+const { createTestimonialSchema, updateTestimonialSchema } = require('../../validators/testimoniValidator/testimoniValidator');
 const Ajv = require('ajv');
 
 const ajv = new Ajv();

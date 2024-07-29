@@ -38,7 +38,7 @@ model User {
 
 model RefreshToken {
   id        Int      @id @default(autoincrement())
-  token     String   @unique
+  token     String   @unique @db.VarChar(512)
   userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -282,7 +282,6 @@ model BeautyService {
   updatedAt          DateTime            @default(now())
   availability       Availability[]
   beautyAppointments BeautyAppointment[]
-  reviews            Review[]
 }
 
 model BeautyAppointment {
@@ -310,12 +309,10 @@ model Availability {
 model Review {
   reviewId      Int           @id @default(autoincrement())
   userId        Int
-  serviceId     Int
   comment       String
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @default(now())
   user          User          @relation(fields: [userId], references: [userId])
-  beautyService BeautyService @relation(fields: [serviceId], references: [serviceId])
 }
 
 enum UserLabel {
