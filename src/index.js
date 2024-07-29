@@ -1,10 +1,11 @@
-const express = require('express')
+const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require("dotenv").config();
-const fs = require('fs');
 const path = require('path');
+const session = require('express-session');
+const passport = require('./config/passportConfig');
 
 const PORT = process.env.PORT || 3001;
 const main = express();
@@ -16,6 +17,39 @@ const corsOptions = {
     methods: ['GET', 'PUT', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 };
+main.use(cors(corsOptions));
+
+main.use(bodyParser.json());
+main.use(bodyParser.urlencoded({ extended: false }));
+main.use(cookieParser());
+
+// Middleware untuk menangani unggahan file
+main.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Middleware logging untuk permintaan ke rute statis (opsional, untuk debugging)
+main.use('/uploads', (req, res, next) => {
+    console.log(`Request to static file: ${req.path}`);
+    next();
+});
+
+// Konfigurasi session
+main.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
+main.use(passport.initialize());
+main.use(passport.session());
+
+// global route
+const testimoniRoutes = require('./route/testimoniRoute/testimoniRoute');
+
+//auth routes
+const authRoutes = require('./route/authentication/authRoute');
+const userRoutes = require('./route/authentication/userRoute');
+
+
 main.use(cors(corsOptions));
 
 main.use(bodyParser.json());
@@ -33,12 +67,8 @@ main.use('/uploads', (req, res, next) => {
     next();
 });
 
-// global route
-const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
 
 //auth routes
-const authRoutes = require('./route/authentication/authRoute');
-const userRoutes = require('./route/authentication/userRoute');
 
 //detail profile routes
 const detailPembelianRoutes = require('./route/detailProfile/purchaseRoute');
@@ -46,6 +76,8 @@ const detailAcaraRoutes = require('./route/detailProfile/eventRoute');
 
 //myacademy routes
 const materiRoutes = require('./route/myAcademyRoute/materialsRoute');
+const trainingRoutes = require('./route/myAcademyRoute/trainingRoutes')
+const examRoutes = require('./route/myAcademyRoute/examRoutes')
 
 //mya routes
 const myaRoutes = '/myg/api/mya';
@@ -57,43 +89,48 @@ const orderRoutes = require('./route/myaRoute/orderRoute');
 //mybeautica routes
 const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
 
-const corstOptions = {
-    origin: 'http://localhost:3000',
-    credentials: true,
-    optionSuccessStatus: 200
-}
-main.use(cors(corstOptions));
-main.use(bodyParser.json());
-main.use(bodyParser.urlencoded({
-    extended: false
-}));
-main.use(cookieParser());
-
-
-//use global routes
+// Gunakan global routes
 main.use('/myg/api/', testimoniRoutes);
 
-//use auth routes
+// Gunakan auth routes
 main.use('/myg/auth', authRoutes);
 main.use('/myg/api/', userRoutes);
 
-//use detail profile routes
+// Gunakan detail profile routes
 main.use('/myg/api/detail-profile', detailPembelianRoutes);
 main.use('/myg/api/detail-profile', detailAcaraRoutes);
 
-
-//use myacademy routes
+// Gunakan myacademy routes
 main.use('/myg/api/materi', materiRoutes);
+main.use('/myg/api/training', trainingRoutes);
+main.use('/myg/api/exam', examRoutes);
 
-//use mya routes
+// Gunakan mya routes
 main.use(myaRoutes + '/produk', productRoutes);
 main.use(myaRoutes + '/keranjang', cartRoutes);
 main.use(myaRoutes + '/keranjang', cartItemRoutes);
 main.use(myaRoutes + '/order', orderRoutes);
 
-//use mybeautica routes
+// Gunakan mybeautica routes
 main.use('/myg/api/layanan', layananRoutes);
 
+// Rute untuk login menggunakan Google
+main.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+main.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/profile'); // Redirect ke profil pengguna setelah berhasil login
+  }
+);
+
+// Rute untuk login menggunakan Facebook
+main.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+main.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/profile'); // Redirect ke profil pengguna setelah berhasil login
+  }
+);
 
 main.listen(PORT, () => {
     console.log('Server is running! port: ' + PORT);

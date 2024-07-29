@@ -21,8 +21,8 @@ async function registerUser(email, password, userProfile, role = 'MEMBER') {
                     address: userProfile.address,
                     profilePicture: userProfile.profilePicture || null,
                     studioName: userProfile.studioName || null,
-                    ktpPicture: userProfile.ktpPicture || null,
-                    studioLogo: userProfile.studioLogo || null,
+                    // ktpPicture: userProfile.ktpPicture || null,
+                    // studioLogo: userProfile.studioLogo || null,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 }
