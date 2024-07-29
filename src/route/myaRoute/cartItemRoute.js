@@ -19,10 +19,10 @@ router.use((req, res, next) => {
     next();
 });
 
-router.post('/item/:productId', authMiddleware.verifyToken, cartItemController.addCartItem);
-router.put('/item/bulk', authMiddleware.verifyToken, cartItemController.bulkUpdateCartItems);
-router.put('/item/:productId', authMiddleware.verifyToken, cartItemController.updateCartItem);
-router.delete('/item/:productId', authMiddleware.verifyToken, cartItemController.deleteCartItem);
+router.post('/item/:productId', authMiddleware.authMiddleware, cartItemController.addCartItem);
+router.put('/item/bulk', authMiddleware.authMiddleware, cartItemController.bulkUpdateCartItems);
+router.put('/item/:productId', authMiddleware.authMiddleware, cartItemController.updateCartItem);
+router.delete('/item/:productId', authMiddleware.authMiddleware, cartItemController.deleteCartItem);
 
 module.exports = router;
 
