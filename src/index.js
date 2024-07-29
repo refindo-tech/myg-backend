@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 require("dotenv").config();
 const path = require('path');
 const session = require('express-session');
-const passport = require('./config/passportConfig');
+// const passport = require('./config/passportConfig');
 
 const PORT = process.env.PORT || 3001;
 const main = express();
@@ -39,11 +39,11 @@ main.use(session({
     saveUninitialized: true,
     cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
-main.use(passport.initialize());
-main.use(passport.session());
+// main.use(passport.initialize());
+// main.use(passport.session());
 
 // global route
-const testimoniRoutes = require('./route/testimoniRoute/testimoniRoute');
+const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
 
 //auth routes
 const authRoutes = require('./route/authentication/authRoute');
@@ -114,23 +114,23 @@ main.use(myaRoutes + '/order', orderRoutes);
 // Gunakan mybeautica routes
 main.use('/myg/api/layanan', layananRoutes);
 
-// Rute untuk login menggunakan Google
-main.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-main.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/profile'); // Redirect ke profil pengguna setelah berhasil login
-  }
-);
+// // Rute untuk login menggunakan Google
+// main.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// main.get('/auth/google/callback',
+//   passport.authenticate('google', { failureRedirect: '/' }),
+//   (req, res) => {
+//     res.redirect('/profile'); // Redirect ke profil pengguna setelah berhasil login
+//   }
+// );
 
-// Rute untuk login menggunakan Facebook
-main.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
-main.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/profile'); // Redirect ke profil pengguna setelah berhasil login
-  }
-);
+// // Rute untuk login menggunakan Facebook
+// main.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+// main.get('/auth/facebook/callback',
+//   passport.authenticate('facebook', { failureRedirect: '/' }),
+//   (req, res) => {
+//     res.redirect('/profile'); // Redirect ke profil pengguna setelah berhasil login
+//   }
+// );
 
 main.listen(PORT, () => {
     console.log('Server is running! port: ' + PORT);

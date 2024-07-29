@@ -373,6 +373,18 @@ enum ProductType {
   DISTRIBUTOR
 }
 
+enum ProductCategory {
+  BEAUTY
+  FASHION
+  HEALTH
+  EDUCATION
+  TECHNOLOGY
+  FOOD
+  TRAVEL
+  HOME
+  OTHER
+}
+
 enum PriceType {
   SAHABAT_MY_ACADEMI
   RETAIL

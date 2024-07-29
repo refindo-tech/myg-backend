@@ -1,10 +1,10 @@
 const OrderService = require('../../services/myaServices/orderService');
 const webResponses = require('../../helpers/web/webResponses');
-const xenditConfig = require('../../helpers/config/xenditConfig');
+// const xenditConfig = require('../../helpers/config/xenditConfig');
 
 //xendit
-const { Invoice } = xenditConfig;
-const invoice = new Invoice();
+// const { Invoice } = xenditConfig;
+// const invoice = new Invoice();
 
 class OrderController {
 
