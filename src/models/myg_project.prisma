@@ -190,7 +190,8 @@ model Product {
   description   String
   stock         Int
   productImages Json
-  type          ProductType
+  type          ProductType  @default(PRODUCT)
+  category      ProductCategory @default(FACE_CARE)
   uploadedBy    Int
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @default(now())
@@ -214,6 +215,7 @@ model Order {
   orderId     Int         @id @default(autoincrement())
   userId      Int
   totalAmount Decimal
+  code        String
   status      OrderStatus
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @default(now())
@@ -374,15 +376,8 @@ enum ProductType {
 }
 
 enum ProductCategory {
-  BEAUTY
-  FASHION
-  HEALTH
-  EDUCATION
-  TECHNOLOGY
-  FOOD
-  TRAVEL
-  HOME
-  OTHER
+  FACE_CARE
+  SKIN_CARE
 }
 
 enum PriceType {
