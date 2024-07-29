@@ -5,7 +5,7 @@ const { database } = require('../../helpers/config/db');
 class CartService {
     //get all cart cart items by user id
     static async getCart(userId) {
-        return await database.cart.findUnique({
+        const cart = await database.cart.findUnique({
             where: {
                 userId: userId
             },
@@ -24,6 +24,17 @@ class CartService {
                 }
             }
         });
+
+        //add each price type to the product object as a key-value pair
+        cart.cartItems.forEach(cartItem => {
+            cartItem.product.price = cartItem.product.price.reduce((acc, curr) => {
+                acc[curr.type] = curr.price;
+                return acc;
+            }, {});
+        });
+
+        return cart;
+
     }
 
     //create cart item

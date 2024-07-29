@@ -8,7 +8,8 @@ const ajv = new Ajv();
 async function getAllProduct(req, res) {
     try {
         const limit = parseInt(req.query.limit) || 10;
-        const product = await productService.getAllProduct(limit);
+        const category = req.query.category || '';
+        const product = await productService.getAllProduct(limit, category);
         return res.status(200).json(webResponses.successResponse(product));
     } catch (error) {
         return res.status(500).json(webResponses.errorResponse(error.message));
