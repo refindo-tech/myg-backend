@@ -1,5 +1,5 @@
 const webResponses = require('../../helpers/web/webResponses');
-const userService = require('../../services/authentication/userServices');
+const userService = require('../../services/authentication/userSevices');
 const multer = require('multer');
 const path = require('path');
 

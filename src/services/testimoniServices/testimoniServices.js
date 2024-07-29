@@ -1,7 +1,7 @@
 const { database } = require('../../helpers/config/db');
 
 async function getAllTestimonials(limit) {
-    return await database.review.findMany({
+    const testimonials = await database.review.findMany({
         take: limit,
         include: {
             user: {
@@ -11,10 +11,19 @@ async function getAllTestimonials(limit) {
             },
         },
     });
+
+    // Mengubah nilai null pada studioName menjadi string kosong
+    testimonials.forEach(testimonial => {
+        testimonial.user.userProfiles.forEach(profile => {
+            profile.studioName = profile.studioName || '';
+        });
+    });
+
+    return testimonials;
 }
 
 async function getTestimonialById(id) {
-    return await database.review.findUnique({
+    const testimonial = await database.review.findUnique({
         where: { reviewId: id },
         include: {
             user: {
@@ -24,22 +33,30 @@ async function getTestimonialById(id) {
             },
         },
     });
+
+    if (testimonial) {
+        // Mengubah nilai null pada studioName menjadi string kosong
+        testimonial.user.userProfiles.forEach(profile => {
+            profile.studioName = profile.studioName || '';
+        });
+    }
+
+    return testimonial;
 }
 
 async function createTestimonial(data) {
-    // Validasi serviceId
-    const serviceExists = await database.beautyService.findUnique({
-        where: { serviceId: data.serviceId },
+    // Validasi userId
+    const userExists = await database.user.findUnique({
+        where: { userId: data.userId },
     });
 
-    if (!serviceExists) {
-        throw new Error('Invalid serviceId. The specified service does not exist.');
+    if (!userExists) {
+        throw new Error('Invalid userId. The specified user does not exist.');
     }
 
     return await database.review.create({
         data: {
             userId: data.userId,
-            serviceId: data.serviceId,
             comment: data.comment,
             createdAt: new Date(),
             updatedAt: new Date(),
