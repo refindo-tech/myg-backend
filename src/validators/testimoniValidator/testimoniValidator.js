@@ -2,10 +2,9 @@ const createTestimonialSchema = {
     type: 'object',
     properties: {
         userId: { type: 'number' },
-        serviceId: { type: 'number' },
         comment: { type: 'string' },
     },
-    required: ['userId', 'serviceId', 'comment'],
+    required: ['userId', 'comment'],
     additionalProperties: false,
 };
 
