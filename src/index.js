@@ -10,7 +10,7 @@ const main = express();
 
 // Konfigurasi CORS
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000','http://127.0.0.1:3001'],
     credentials: true,
     methods: ['GET', 'PUT', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -32,7 +32,7 @@ main.use('/uploads', (req, res, next) => {
 
 
 // global route
-const testimoniRoutes = require('./route/testimoniRoute/testimoniRoute');
+const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
 
 //auth routes
 const authRoutes = require('./route/authentication/authRoute');

@@ -6,11 +6,23 @@ class ProductService {
             take: limit,
             include: { price: true }
         };
-        const userLabel = 'RETAIL';
+        // const userLabel = 'RETAIL';
+        // const products = await database.product.findMany(queryOptions);
+        // products.forEach(product => {
+        //     product.price = product.price.find(p => p.type === userLabel)?.price || 0;
+        // });
+
         const products = await database.product.findMany(queryOptions);
         products.forEach(product => {
-            product.price = product.price.find(p => p.type === userLabel)?.price || 0;
-        });
+            // add each price type to the product object as a key-value pair
+            product.price = product.price.reduce((acc, curr) => {
+                acc[curr.type] = curr.price;
+                return acc;
+            }
+            , {});
+        }
+        );
+
         return products;
     }
 
@@ -22,8 +34,13 @@ class ProductService {
         if (!product) {
             throw new Error('Product not found');
         }
-        const userLabel = 'RETAIL';
-        product.price = product.price.find(p => p.type === userLabel)?.price || 0;
+        // const userLabel = 'RETAIL';
+        // product.price = product.price.find(p => p.type === userLabel)?.price || 0;
+        // add each price type to the product object as a key-value pair
+        product.price = product.price.reduce((acc, curr) => {
+            acc[curr.type] = curr.price;
+            return acc;
+        }, {});
 
         return product;
     }
