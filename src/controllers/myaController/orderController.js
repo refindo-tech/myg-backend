@@ -18,6 +18,17 @@ class OrderController {
         }
     }
 
+    static async getOrder(req, res) {
+        try {
+            const orderId = parseInt(req.params.orderId);
+            console.log(req.params);
+            const order = await OrderService.getOrderById(orderId);
+            return res.status(200).json(webResponses.successResponse(order));
+        } catch (error) {
+            return res.status(500).json(webResponses.errorResponse(error.message));
+        }
+    }
+
     static async createOrder(req, res) {
         try {
             const { userId } = req.user;
@@ -25,7 +36,6 @@ class OrderController {
             const order = await OrderService.createOrder(userId);
 
             //Xendit API call to create payment
-
             return res.status(201).json(webResponses.successResponse(order));
         } catch (error) {
             return res.status(500).json(webResponses.errorResponse(error.message));

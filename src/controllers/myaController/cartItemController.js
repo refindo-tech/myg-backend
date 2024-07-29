@@ -60,6 +60,8 @@ class CartItemController {
             const { userId } = req.user;
             const cartItems = req.body;
 
+            console.log('cartItems', cartItems);
+
             const cart = await cartService.getCart(Number(userId));
             if (!cart) {
                 return res.status(404).json(webResponses.errorResponse('Cart not found'));

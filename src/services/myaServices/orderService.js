@@ -10,6 +10,45 @@ class OrderService {
         });
     }
 
+    //get order by id
+    static async getOrderById(orderId) {
+        const data = await database.order.findUnique({
+            where: { orderId: orderId },
+            include: {
+                orderItems: {
+                    include: {
+                        product: {
+                            select: {
+                                name: true,
+                                productImages: true
+                            }
+                        }
+                    }
+                },
+                user: {
+                    select: {
+                        userId: true,
+                        userProfiles: {
+                            select: {
+                                fullName: true,
+                                address: true,
+                                phoneNumber: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        //add totalPrice to orderItems
+        data.orderItems.forEach(orderItem => {
+            orderItem.total = orderItem.quantity * orderItem.price;
+        }
+        );
+
+        return data;
+    }
+
     static async createOrder(userId) {
         // Fetch user's cart and user label in a single query
         const userData = await database.user.findUnique({
@@ -17,26 +56,26 @@ class OrderService {
             select: {
                 userLabel: true,
                 cart: {
-                    include: { 
-                        cartItems: { 
-                            include: { 
-                                product: { 
-                                    include: { price: true } 
-                                } 
-                            } 
-                        } 
+                    include: {
+                        cartItems: {
+                            include: {
+                                product: {
+                                    include: { price: true }
+                                }
+                            }
+                        }
                     }
                 }
             }
         });
-    
+
         const cart = userData?.cart;
         const userLabel = userData?.userLabel || 'RETAIL';
-    
+
         if (!cart || cart.cartItems.length === 0) {
             throw new Error('Cart is empty or not found');
         }
-    
+
         // Determine user label if not present
         let label = userLabel;
         //if label is RETAIL or AGENT
@@ -47,7 +86,7 @@ class OrderService {
             }, 0);
 
             console.log(tempAmount);
-    
+
             if (tempAmount > 10000000) {
                 label = 'DISTRIBUTOR';
                 console.log('DISTRIBUTOR');
@@ -63,13 +102,13 @@ class OrderService {
                 });
             }
         }
-    
+
         // Calculate total amount with the determined label
         const totalAmount = cart.cartItems.reduce((total, item) => {
             const price = item.product.price.find(p => p.type === label)?.price || 0;
             return total + item.quantity * price;
         }, 0);
-    
+
         // Create the order
         const order = await database.order.create({
             data: {
@@ -86,13 +125,13 @@ class OrderService {
                 }
             }
         });
-    
+
         // Clear the cart
         await database.cartItem.deleteMany({ where: { cartId: cart.cartId } });
-    
+
         return order;
     }
-    
+
 }
 
 module.exports = OrderService;

@@ -19,8 +19,9 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/', authMiddleware.verifyToken, orderController.getOrders);
-router.post('/', authMiddleware.verifyToken, orderController.createOrder);
+router.get('/', authMiddleware.authMiddleware, orderController.getOrders);
+router.get('/:orderId', authMiddleware.authMiddleware, orderController.getOrder);
+router.post('/', authMiddleware.authMiddleware, orderController.createOrder);
 
 module.exports = router;
 
