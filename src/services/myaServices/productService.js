@@ -1,13 +1,25 @@
 const { database } = require('../../helpers/config/db');
 
 class ProductService {
-    async getAllProduct(limit = 10, category = '') {
+    async getAllProduct(limit = 10, category = '', isRecommended = false) {
+        //if isRecommended is true, get all products with isRecommended = true, else get all products
+        // const queryOptions = {
+        //     where: category ? { category } : {},
+        //     take: limit,
+        //     orderBy: { createdAt: 'desc' },
+        //     include: { price: true },
+        // };
+
         const queryOptions = {
-            where: category ? { category } : {},
+            where: {
+                category: category ? category : undefined,
+                isRecommended: isRecommended ? true : undefined
+            },
             take: limit,
             orderBy: { createdAt: 'desc' },
             include: { price: true },
         };
+
         // const userLabel = 'RETAIL';
         // const products = await database.product.findMany(queryOptions);
         // products.forEach(product => {

@@ -9,7 +9,9 @@ async function getAllProduct(req, res) {
     try {
         const limit = parseInt(req.query.limit) || 10;
         const category = req.query.category || '';
-        const product = await productService.getAllProduct(limit, category);
+        //turn isRecommended to boolean
+        const isRecommended = req.query.isRecommended === 'true';
+        const product = await productService.getAllProduct(limit, category, isRecommended);
         return res.status(200).json(webResponses.successResponse(product));
     } catch (error) {
         return res.status(500).json(webResponses.errorResponse(error.message));
