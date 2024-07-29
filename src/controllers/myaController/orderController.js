@@ -42,6 +42,22 @@ class OrderController {
         }
     }
 
+    // create order one product
+    static async createOrderOneProduct(req, res) {
+        try {
+            const { userId } = req.user;
+            const productId = parseInt(req.params.productId);
+            const { quantity } = req.body;
+
+            const order = await OrderService.createOrderOneProduct(userId, productId, quantity);
+
+            //Xendit API call to create payment
+            return res.status(201).json(webResponses.successResponse(order));
+        } catch (error) {
+            return res.status(500).json(webResponses.errorResponse(error.message));
+        }
+    }
+
     // Other order-related methods (e.g., getOrderById, getOrdersByUser, etc.) can go here...
 }
 

@@ -22,6 +22,7 @@ router.use((req, res, next) => {
 router.get('/', authMiddleware.authMiddleware, orderController.getOrders);
 router.get('/:orderId', authMiddleware.authMiddleware, orderController.getOrder);
 router.post('/', authMiddleware.authMiddleware, orderController.createOrder);
+router.post('/:productId', authMiddleware.authMiddleware, orderController.createOrderOneProduct);
 
 module.exports = router;
 

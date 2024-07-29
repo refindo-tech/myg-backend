@@ -132,6 +132,43 @@ class OrderService {
         return order;
     }
 
+    // Create order one product by product id
+    static async createOrderOneProduct(userId, productId) {
+        const product = await database.product.findUnique({
+            where: { productId: productId },
+            include: { price: true }
+        });
+
+        if (!product) {
+            throw new Error('Product not found');
+        }
+
+        const userLabel = (await database.user.findUnique({
+            where: { userId: userId },
+            select: { userLabel: true }
+        }))?.userLabel || 'RETAIL';
+
+        const price = product.price.find(p => p.type === userLabel)?.price || 0;
+
+        const order = await database.order.create({
+            data: {
+                userId: userId,
+                totalAmount: price,
+                code: `ORD-${Date.now()}`, // Simple order code generation
+                status: 'PENDING', // Initial status
+                orderItems: {
+                    create: {
+                        productId: productId,
+                        quantity: 1,
+                        price: price
+                    }
+                }
+            }
+        });
+
+        return order;
+    }
+
 }
 
 module.exports = OrderService;
