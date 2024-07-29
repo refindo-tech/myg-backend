@@ -59,16 +59,19 @@ model UserProfile {
   profileId      Int      @id @default(autoincrement())
   userId         Int
   fullName       String
-  studioName     String
   address        String
   phoneNumber    String
-  profilePicture String?
   socialMedia    String
+  profilePicture String?
+  studioName     String? // Mengubah field menjadi nullable
+  ktpPicture     String?
+  studioLogo     String?
   birthdate      DateTime
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now())
   user           User     @relation(fields: [userId], references: [userId])
 }
+
 
 model UserCoin {
   coinId Int  @id @default(autoincrement())

@@ -32,7 +32,7 @@ main.use('/uploads', (req, res, next) => {
 
 
 // global route
-const testimoniRoutes = require('./route/myBeauticaRoute/testimoniRoute');
+const testimoniRoutes = require('./route/testimoniRoute/testimoniRoute');
 
 //auth routes
 const authRoutes = require('./route/authentication/authRoute');
