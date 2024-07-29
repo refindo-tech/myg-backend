@@ -1,10 +1,12 @@
 const { database } = require('../../helpers/config/db');
 
 class ProductService {
-    async getAllProduct(limit = 10) {
+    async getAllProduct(limit = 10, category = '') {
         const queryOptions = {
+            where: category ? { category } : {},
             take: limit,
-            include: { price: true }
+            orderBy: { createdAt: 'desc' },
+            include: { price: true },
         };
         // const userLabel = 'RETAIL';
         // const products = await database.product.findMany(queryOptions);

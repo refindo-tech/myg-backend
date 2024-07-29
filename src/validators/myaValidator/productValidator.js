@@ -5,6 +5,7 @@ const productSchema = {
         name: { type: "string" },
         description: { type: "string" },
         stock: { type: "integer" },
+        category: { type: "enum", enum: ['SKIN_CARE', 'FACE_CARE'] },
         productImages: { type: "array", items: { type: "string" } },
         type: { type: "string", enum: ['PRODUCT', 'SERVICE'] },
         uploadedBy: { type: "integer" },
