@@ -133,7 +133,10 @@ class OrderService {
     }
 
     // Create order one product by product id
-    static async createOrderOneProduct(userId, productId) {
+    static async createOrderOneProduct(userId, productId, quantity) {
+
+        console.log(userId, productId, quantity);
+
         const product = await database.product.findUnique({
             where: { productId: productId },
             include: { price: true }
@@ -159,7 +162,7 @@ class OrderService {
                 orderItems: {
                     create: {
                         productId: productId,
-                        quantity: 1,
+                        quantity: quantity,
                         price: price
                     }
                 }

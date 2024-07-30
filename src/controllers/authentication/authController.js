@@ -64,8 +64,8 @@ async function loginUser(req, res) {
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000
+            sameSite: 'none',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         res.status(200).json(webResponses.successResponse('User logged in successfully', { accessToken, user }));
@@ -77,6 +77,7 @@ async function loginUser(req, res) {
 
 async function refreshAccessToken(req, res) {
     const refreshToken = req.cookies.refreshToken;
+    console.log('Refresh Token:', refreshToken);
     if (!refreshToken) {
         return res.status(401).json(webResponses.errorResponse('No refresh token provided'));
     }

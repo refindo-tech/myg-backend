@@ -22,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
         req.user = { ...decoded, userProfiles: user.userProfiles };
         next();
     } catch (ex) {
-        res.status(400).json(webResponses.errorResponse('Invalid token.'));
+        res.status(401).json(webResponses.errorResponse('Invalid token.'));
     }
 };
 
