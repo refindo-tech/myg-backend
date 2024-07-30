@@ -3,11 +3,22 @@ const { database } = require('../../helpers/config/db');
 class OrderService {
 
     //get all orders by user id
-    static async getOrdersByUser(userId) {
-        return await database.order.findMany({
+    static async getOrdersByUser(userId, limit = 10, offset = 0) {
+        const data = await database.order.findMany({
             where: { userId: userId },
-            include: { orderItems: { include: { product: true } } }
+            orderBy: { createdAt: 'desc' },
+            select: {
+                orderId: true,
+                code: true,
+                totalAmount: true,
+                status: true,
+                createdAt: true,
+            },
+            take: limit,
+            skip: offset
         });
+
+        return data;
     }
 
     //get order by id

@@ -11,7 +11,9 @@ class OrderController {
     static async getOrders(req, res) {
         try {
             const { userId } = req.user;
-            const orders = await OrderService.getOrdersByUser(userId);
+            const limit = parseInt(req.query.limit) || 10;
+            const offset = parseInt(req.query.offset) || 0;
+            const orders = await OrderService.getOrdersByUser(userId, limit, offset);
             return res.status(200).json(webResponses.successResponse(orders));
         } catch (error) {
             return res.status(500).json(webResponses.errorResponse(error.message));
