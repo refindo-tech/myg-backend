@@ -47,8 +47,9 @@ class OrderController {
         try {
             const { userId } = req.user;
             const productId = parseInt(req.params.productId);
+            //{ params: { quantity: 10 } }
             const { quantity } = req.body;
-
+            console.log(req.body);
             const order = await OrderService.createOrderOneProduct(userId, productId, quantity);
 
             //Xendit API call to create payment
