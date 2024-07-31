@@ -162,7 +162,9 @@ class OrderService {
             select: { userLabel: true }
         }))?.userLabel || 'RETAIL';
 
-        const price = product.price.find(p => p.type === userLabel)?.price || 0;
+        let label = userLabel === 'SAHABAT_MY_ACADEMI' ? 'RETAIL' : userLabel;
+
+        const price = product.price.find(p => p.type === label)?.price || 0;
 
         const order = await database.order.create({
             data: {
