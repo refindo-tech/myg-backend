@@ -164,6 +164,24 @@ class OrderService {
 
         let label = userLabel === 'SAHABAT_MY_ACADEMI' ? 'RETAIL' : userLabel;
 
+        if (label === 'RETAIL' || label === 'AGENT') {
+            const tempAmount = quantity * product.price.find(p => p.type === label)?.price || 0;
+
+            if (tempAmount > 10000000) {
+                label = 'DISTRIBUTOR';
+            } else if (tempAmount > 3000000) {
+                label = 'AGENT';
+            }
+
+            // Update user label
+            if (label !== userLabel) {
+                await database.user.update({
+                    where: { userId: userId },
+                    data: { userLabel: label }
+                });
+            }
+        }
+
         const price = product.price.find(p => p.type === label)?.price || 0;
 
         const order = await database.order.create({
