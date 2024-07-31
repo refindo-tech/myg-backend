@@ -36,10 +36,11 @@ async function getAllTrainingPast(req, res) {
                 embedMaps:detailTraining.embedMaps,
                 price:detailTraining.price,
                 linkMaps:detailTraining.linkMaps,
-                brosur:detailTraining.materials[0].brosur,
-                type:type,
+                materials: detailTraining.materials,
+                materi:detailTraining.materi,
+                benefit:detailTraining.benefit
             }
-            return res.status(200).json(webResponses.successResponse('Validate Success',formattedResponse));
+            return res.status(200).json(webResponses.successResponse('Validate Success',detailTraining));
         }
         else{
             throw(error)
@@ -70,6 +71,8 @@ async function getDetailTraining(req, res){
                     linkMaps:detailTraining.linkMaps,
                     materials:detailTraining.materials,
                     brosur:detailTraining.materials[0].brosur,
+                    materi:detailTraining.materi,
+                    benefit:detailTraining.benefit,
                     type:type,
                 }
                 return res.status(200).json(webResponses.successResponse('Validate Success',formattedResponse));
@@ -88,6 +91,8 @@ async function getDetailTraining(req, res){
                     linkMaps:detailTraining.linkMaps,
                     materials:detailTraining.materials,
                     brosur:detailTraining.materials[0].brosur,
+                    materi:detailTraining.materi,
+                    benefit:detailTraining.benefit,
                     type:type,
                 }
                 return res.status(200).json(webResponses.successResponse('Validate Success',formattedResponse));
