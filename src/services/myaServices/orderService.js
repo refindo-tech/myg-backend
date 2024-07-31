@@ -87,8 +87,8 @@ class OrderService {
             throw new Error('Cart is empty or not found');
         }
 
-        // Determine user label if not present
-        let label = userLabel;
+    
+        let label = userLabel === 'SAHABAT_MY_ACADEMI' ? 'RETAIL' : userLabel;
         //if label is RETAIL or AGENT
         if (label === 'RETAIL' || label === 'AGENT') {
             const tempAmount = cart.cartItems.reduce((total, item) => {
