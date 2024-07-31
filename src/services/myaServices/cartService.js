@@ -25,6 +25,10 @@ class CartService {
             }
         });
 
+        if (!cart) {
+            return cart;
+        }
+
         //add each price type to the product object as a key-value pair
         cart.cartItems.forEach(cartItem => {
             cartItem.product.price = cartItem.product.price.reduce((acc, curr) => {
