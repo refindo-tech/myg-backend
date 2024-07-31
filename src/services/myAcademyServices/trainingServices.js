@@ -1,7 +1,6 @@
 const { validateFunctionCode } = require('ajv/dist/compile/validate');
 const { database } = require('../../helpers/config/db');
 
-
 async function getTrainingComingSoon(limit){
     return database.training.findMany({
         where:{
