@@ -105,6 +105,8 @@ model Training {
   price        Int?
   embedMaps    String?    @db.Text
   linkMaps     String?
+  materi       String?    @db.Text
+  benefit      String?    @db.Text
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now())
   materials    Material[]
