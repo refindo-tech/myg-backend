@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
 }
 
 datasource db {
@@ -28,8 +28,8 @@ model User {
   exams              Exam[]              @relation("ExamCreator")
   examResults        ExamResult[]
   products           Product[]           @relation("ProductUploader")
+  cart               Cart?
   orders             Order[]
-  carts              Cart[]
   wishlists          Wishlist[]
   guidelines         Guideline[]         @relation("GuidelineUploader")
   beautyAppointments BeautyAppointment[]
@@ -38,7 +38,7 @@ model User {
 
 model RefreshToken {
   id        Int      @id @default(autoincrement())
-  token     String   @unique
+  token     String   @unique @db.VarChar(512)
   userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -59,16 +59,19 @@ model UserProfile {
   profileId      Int      @id @default(autoincrement())
   userId         Int
   fullName       String
-  studioName     String
   address        String
   phoneNumber    String
-  profilePicture String?
   socialMedia    String
+  profilePicture String?
+  studioName     String? // Mengubah field menjadi nullable
+  ktpPicture     String?
+  studioLogo     String?
   birthdate      DateTime
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now())
   user           User     @relation(fields: [userId], references: [userId])
 }
+
 
 model UserCoin {
   coinId Int  @id @default(autoincrement())
@@ -189,18 +192,19 @@ model ExamResult {
 model Product {
   productId     Int            @id @default(autoincrement())
   name          String
-  description   String
-  priceId       Int
+  description   String        @db.Text
   stock         Int
   productImages Json
-  type          ProductType
+  type          ProductType  @default(PRODUCT)
+  category      ProductCategory @default(FACE_CARE)
+  isRecommended Boolean
   uploadedBy    Int
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @default(now())
   price         ProductPrice[]
   user          User           @relation("ProductUploader", fields: [uploadedBy], references: [userId])
   orderItems    OrderItem[]
-  cart          Cart[]
+  cartItems     CartItem[]
   wishlist      Wishlist[]
   guideline     Guideline[]
 }
@@ -217,6 +221,7 @@ model Order {
   orderId     Int         @id @default(autoincrement())
   userId      Int
   totalAmount Decimal
+  code        String
   status      OrderStatus
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @default(now())
@@ -236,11 +241,20 @@ model OrderItem {
 
 model Cart {
   cartId    Int     @id @default(autoincrement())
-  userId    Int
-  productId Int
-  quantity  Int
+  userId    Int     @unique
   user      User    @relation(fields: [userId], references: [userId])
-  product   Product @relation(fields: [productId], references: [productId])
+  cartItems CartItem[]
+}
+
+model CartItem {
+  cartItemId Int     @id @default(autoincrement())
+  cartId     Int
+  productId  Int
+  quantity   Int
+  cart       Cart    @relation(fields: [cartId], references: [cartId])
+  product    Product @relation(fields: [productId], references: [productId])
+
+  @@unique([cartId, productId])
 }
 
 model Wishlist {
@@ -276,7 +290,6 @@ model BeautyService {
   updatedAt          DateTime            @default(now())
   availability       Availability[]
   beautyAppointments BeautyAppointment[]
-  reviews            Review[]
 }
 
 model BeautyAppointment {
@@ -304,12 +317,10 @@ model Availability {
 model Review {
   reviewId      Int           @id @default(autoincrement())
   userId        Int
-  serviceId     Int
-  comment       String
+  comment       String        @db.Text
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @default(now())
   user          User          @relation(fields: [userId], references: [userId])
-  beautyService BeautyService @relation(fields: [serviceId], references: [serviceId])
 }
 
 enum UserLabel {
@@ -365,6 +376,11 @@ enum ProductType {
   RETAIL
   AGENT
   DISTRIBUTOR
+}
+
+enum ProductCategory {
+  FACE_CARE
+  SKIN_CARE
 }
 
 enum PriceType {

@@ -1,37 +1,40 @@
-//Validate the data that is being sent to the server using Ajv
-
 const productSchema = {
     type: "object",
     properties: {
         productId: { type: "integer" },
         name: { type: "string" },
         description: { type: "string" },
-        priceId: { type: "integer" },
         stock: { type: "integer" },
+        category: { type: "enum", enum: ['SKIN_CARE', 'FACE_CARE'] },
         productImages: { type: "array", items: { type: "string" } },
-        type: { type: "string", enum: ['PRODUCT','SERVICE','RETAIL','AGENT','DISTRIBUTOR'] }, 
+        type: { type: "string", enum: ['PRODUCT', 'SERVICE'] },
         uploadedBy: { type: "integer" },
-        // createdAt: { type: "string", format: "date-time" },
-        // updatedAt: { type: "string", format: "date-time" },
-        // price: { type: "array", items: { type: "object" } }, 
-        // user: { type: "object" }, 
-        // orderItems: { type: "array", items: { type: "object" } }, 
-        // cart: { type: "array", items: { type: "object" } }, 
-        // wishlist: { type: "array", items: { type: "object" } }, 
-        // guideline: { type: "array", items: { type: "object" } } 
+        price: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    type: { type: "string", enum: ['RETAIL', 'AGENT', 'DISTRIBUTOR'] },
+                    price: { type: "number" }
+                },
+                required: ["type", "price"],
+                additionalProperties: false
+            },
+            minItems: 3,
+            uniqueItems: true
+        }
     },
-    required: ["name", "description", "priceId", "stock", "productImages", "type", "uploadedBy"],
+    required: ["name", "description", "stock", "productImages", "type", "price"],
     additionalProperties: false
 };
 
 const createProductSchema = {
     ...productSchema,
-    required: ["name", "description", "priceId", "stock", "productImages", "type", "uploadedBy"],
 };
 
 const updateProductSchema = {
     ...productSchema,
-    required: [],
+    required: [], // Allow partial updates
 };
 
 module.exports = {

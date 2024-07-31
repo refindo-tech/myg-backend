@@ -1,7 +1,6 @@
 const trainingServices = require('../../services/myAcademyServices/trainingServices');
 const webResponses = require('../../helpers/web/webResponses');
 const Ajv = require('ajv');
-const { error } = require('ajv/dist/vocabularies/applicator/dependencies');
 
 const ajv = new Ajv();
 
@@ -9,13 +8,8 @@ const ajv = new Ajv();
 async function getAllTrainingComingSoon(req, res) {
     try {
         const {limit} = req.params
-        const detailTraining = await trainingServices.getTrainingComingSoon(Number(limit));
-        if(detailTraining){
-            return res.status(200).json(webResponses.successResponse('Validate Success',detailTraining));
-        }
-        else{
-            throw(error)
-        }
+        const training = await trainingServices.getTrainingComingSoon(Number(limit));
+        return res.status(200).json(webResponses.successResponse('p',training));
     } catch (error) {
         console.error(error);
         return res.status(500).json(webResponses.errorResponse(error.message));
