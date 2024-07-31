@@ -52,6 +52,7 @@ async function detailTraining (idTraining){
         }
     })
 }
+
 module.exports={
     getTrainingComingSoon,
     detailTraining,
