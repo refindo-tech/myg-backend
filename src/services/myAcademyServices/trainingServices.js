@@ -36,16 +36,8 @@ async function getTrainingPast(limit){
         orderBy:{
             dateStart:'asc'
         },
-        select:{
-            trainingId:true,
-            trainingName:true,
-            description:true,
-            dateStart:true,
-            dateFinish:true,
-            materials:true,
-            embedMaps:true,
-            price:true,
-            linkMaps:true
+        include:{
+            materials:true
         },
         take:limit
     })
