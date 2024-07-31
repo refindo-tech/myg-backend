@@ -38,7 +38,7 @@ Untuk menjalankan proyek ini secara lokal, gunakan perintah berikut:
 npm start
 ```
 
-Ini akan menjalankan server Express dan membuat aplikasi tersedia di `http://localhost:3000`.
+Ini akan menjalankan server Express dan membuat aplikasi tersedia di `http://92.112.192.81:3000`.
 
 ## Kontribusi
 

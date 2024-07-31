@@ -18,8 +18,27 @@ async function getAllTrainingComingSoon(req, res) {
 async function getAllTrainingPast(req, res) {
     try {
         const {limit} = req.params
-        const training = await trainingServices.getTrainingPast(Number(limit));
-        return res.status(200).json(webResponses.successResponse('p',training));
+        const detailTraining = await trainingServices.getTrainingPast(Number(limit));
+        if(detailTraining){
+            const formattedResponse = {
+                trainingId:detailTraining.trainingId,
+                trainingName:detailTraining.trainingName,
+                description:detailTraining.description,
+                dateStart:detailTraining.dateStart,
+                dateFinish:detailTraining.dateFinish,
+                address:detailTraining.address,
+                embedMaps:detailTraining.embedMaps,
+                price:detailTraining.price,
+                linkMaps:detailTraining.linkMaps,
+                materials: detailTraining.materials,
+                materi:detailTraining.materi,
+                benefit:detailTraining.benefit
+            }
+            return res.status(200).json(webResponses.successResponse('Validate Success',detailTraining));
+        }
+        else{
+            throw(error)
+        }
     } catch (error) {
         console.error(error);
         return res.status(500).json(webResponses.errorResponse(error.message));
@@ -45,6 +64,9 @@ async function getDetailTraining(req, res){
                     price:detailTraining.price,
                     linkMaps:detailTraining.linkMaps,
                     materials:detailTraining.materials,
+                    brosur:detailTraining.materials[0].brosur,
+                    materi:detailTraining.materi,
+                    benefit:detailTraining.benefit,
                     type:type,
                 }
                 return res.status(200).json(webResponses.successResponse('Validate Success',formattedResponse));
@@ -62,6 +84,9 @@ async function getDetailTraining(req, res){
                     price:detailTraining.price,
                     linkMaps:detailTraining.linkMaps,
                     materials:detailTraining.materials,
+                    brosur:detailTraining.materials[0].brosur,
+                    materi:detailTraining.materi,
+                    benefit:detailTraining.benefit,
                     type:type,
                 }
                 return res.status(200).json(webResponses.successResponse('Validate Success',formattedResponse));
