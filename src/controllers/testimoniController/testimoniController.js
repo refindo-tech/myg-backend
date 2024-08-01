@@ -9,7 +9,8 @@ const ajv = new Ajv();
 async function getAllTestimonials(req, res) {
     try {
         const limit = parseInt(req.query.limit) || 3;
-        const testimonials = await testimoniService.getAllTestimonials(limit);
+        const isApproved = req.query.isApproved === 'true';
+        const testimonials = await testimoniService.getAllTestimonials(limit, isApproved);
         // const formattedTestimonials = testimonials.map(testimonial => {
         //     const fullName = testimonial.user.userProfiles[0]?.fullName || 'Unknown';
         //     return {
