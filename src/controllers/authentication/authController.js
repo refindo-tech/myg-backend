@@ -77,7 +77,6 @@ async function loginUser(req, res) {
 
 async function refreshAccessToken(req, res) {
     const refreshToken = req.cookies.refreshToken;
-    console.log('Refresh Token:', refreshToken);
     if (!refreshToken) {
         return res.status(401).json(webResponses.errorResponse('No refresh token provided'));
     }
@@ -119,7 +118,8 @@ async function getProfile(req, res) {
             role: user.role,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-            profilePicture: user.userProfiles[0]?.profilePicture || null
+            profilePicture: user.userProfiles[0]?.profilePicture || null,
+            fullName: user.userProfiles[0]?.fullName || 'Unknown',
         };
 
         res.status(200).json(webResponses.successResponse('User profile fetched successfully', result));
