@@ -23,7 +23,7 @@ class OrderController {
     static async getOrder(req, res) {
         try {
             const orderId = parseInt(req.params.orderId);
-            console.log(req.params);
+            // console.log(req.params);
             const order = await OrderService.getOrderById(orderId);
             return res.status(200).json(webResponses.successResponse(order));
         } catch (error) {
@@ -51,7 +51,7 @@ class OrderController {
             const productId = parseInt(req.params.productId);
             //{ params: { quantity: 10 } }
             const { quantity } = req.body;
-            console.log(req.body);
+            // console.log(req.body);
             const order = await OrderService.createOrderOneProduct(userId, productId, quantity);
 
             //Xendit API call to create payment

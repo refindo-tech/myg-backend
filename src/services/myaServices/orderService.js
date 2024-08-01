@@ -96,11 +96,11 @@ class OrderService {
                 return total + item.quantity * price;
             }, 0);
 
-            console.log(tempAmount);
+            // console.log(tempAmount);
 
             if (tempAmount > 10000000) {
                 label = 'DISTRIBUTOR';
-                console.log('DISTRIBUTOR');
+                // console.log('DISTRIBUTOR');
             } else if (tempAmount > 3000000) {
                 label = 'AGENT';
             }
@@ -146,7 +146,7 @@ class OrderService {
     // Create order one product by product id
     static async createOrderOneProduct(userId, productId, quantity) {
 
-        console.log(userId, productId, quantity);
+        // console.log(userId, productId, quantity);
 
         const product = await database.product.findUnique({
             where: { productId: productId },
