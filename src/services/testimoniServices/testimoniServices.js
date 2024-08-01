@@ -1,6 +1,7 @@
 const { database } = require('../../helpers/config/db');
 
 async function getAllTestimonials(limit, isApproved = true) {
+    console.log('isApproved:', isApproved);
     const testimonials = await database.review.findMany({
         take: limit,
         where: { isApproved: isApproved ? true : undefined },
