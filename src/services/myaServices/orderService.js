@@ -182,12 +182,13 @@ class OrderService {
             }
         }
 
-        const price = product.price.find(p => p.type === label)?.price || 0;
+        // const price = product.price.find(p => p.type === label)?.price || 0;
+        const totalPrice = quantity * product.price.find(p => p.type === label)?.price || 0;
 
         const order = await database.order.create({
             data: {
                 userId: userId,
-                totalAmount: price,
+                totalAmount: totalPrice,
                 code: `ORD-${Date.now()}`, // Simple order code generation
                 status: 'PENDING', // Initial status
                 orderItems: {
