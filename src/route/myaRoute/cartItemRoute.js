@@ -5,7 +5,7 @@ const authMiddleware = require('../../middlewares/authMiddleware');
 
 
 router.use((req, res, next) => {
-    const allowedOrigins = ['http://92.112.192.81:3000', 'http://127.0.0.1:3000'];
+    const allowedOrigins = ['https://92.112.192.81:3000', 'http://127.0.0.1:3000'];
     const origin = req.headers.origin;
 
     if (allowedOrigins.includes(origin)) {
