@@ -21,8 +21,8 @@ router.use((req, res, next) => {
 
 router.get('/testimonials', testimoniController.getAllTestimonials);
 router.get('/testimonials/:id', testimoniController.getTestimonialById);
-router.post('/testimonials', authMiddleware, testimoniController.createTestimonial);
+router.post('/testimonials', testimoniController.createTestimonial);
 router.put('/testimonials/:id', testimoniController.updateTestimonial);
-router.delete('/testimonials/:id', testimoniController.deleteTestimonial);
+router.delete('/testimonials/:id', authMiddleware, testimoniController.deleteTestimonial);
 
 module.exports = router;
