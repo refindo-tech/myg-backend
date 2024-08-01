@@ -280,7 +280,7 @@ model Guideline {
 model BeautyService {
   serviceId   Int     @id @default(autoincrement())
   title       String
-  description String
+  description String  @db.VarChar(5120)
   price       Decimal
   imageUrl    String?
   viewCount   Int     @default(0)
