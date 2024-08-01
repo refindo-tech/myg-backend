@@ -94,7 +94,8 @@ async function getUserProfile(userId) {
         include: {
             userProfiles: {
                 select: {
-                    profilePicture: true
+                    profilePicture: true,
+                    fullName: true,
                 }
             }
         }
