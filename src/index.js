@@ -10,7 +10,7 @@ const main = express();
 
 // Konfigurasi CORS
 const corsOptions = {
-    origin: ['https://92.112.192.81:3000', 'http://localhost:3001', 'http://127.0.0.1:3000','http://127.0.0.1:3001', 'https://myg.app'],
+    origin: ['http://92.112.192.81:3000', 'http://localhost:3001', 'http://127.0.0.1:3000','http://127.0.0.1:3001', 'https://myg.app'],
     credentials: true,
     methods: ['GET', 'PUT', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
