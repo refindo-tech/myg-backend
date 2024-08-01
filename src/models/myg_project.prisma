@@ -33,7 +33,6 @@ model User {
   wishlists          Wishlist[]
   guidelines         Guideline[]         @relation("GuidelineUploader")
   beautyAppointments BeautyAppointment[]
-  reviews            Review[]
 }
 
 model RefreshToken {
@@ -316,11 +315,12 @@ model Availability {
 
 model Review {
   reviewId      Int           @id @default(autoincrement())
-  userId        Int
+  name          String        @default("Sahabat My Academi")
+  email         String        @default("sahabat@myacademy.com")
+  role          String        @default("Member")
   comment       String        @db.Text
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @default(now())
-  user          User          @relation(fields: [userId], references: [userId])
 }
 
 enum UserLabel {
