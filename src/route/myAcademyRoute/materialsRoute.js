@@ -12,7 +12,7 @@ const materialsController = require('../../controllers/myAcademyController/mater
 // });
 
 router.use((req, res, next) => {
-    const allowedOrigins = ['https://92.112.192.81:3000', 'http://127.0.0.1:3000','http://localhost:3001', 'http://127.0.0.1:3001', 'https://myg.app'];
+    const allowedOrigins = ['http://92.112.192.81:3000', 'http://127.0.0.1:3000','http://localhost:3001', 'http://127.0.0.1:3001', 'https://myg.app'];
     const origin = req.headers.origin;
 
     if (allowedOrigins.includes(origin)) {
