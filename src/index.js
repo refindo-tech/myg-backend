@@ -61,6 +61,7 @@ main.use('/uploads', (req, res, next) => {
 
 //detail profile routes
 const detailPembelianRoutes = require('./route/detailProfile/purchaseRoute');
+const testimoniAcademyRoutes = require('./route/myAcademyRoute/testimoniAcademyRoutes');
 const detailAcaraRoutes = require('./route/detailProfile/eventRoute');
 
 //myacademy routes
@@ -93,6 +94,7 @@ main.use('/myg/api/detail-profile', detailAcaraRoutes);
 main.use('/myg/api/materi', materiRoutes);
 main.use('/myg/api/training', trainingRoutes);
 main.use('/myg/api/exam', examRoutes);
+main.use('/myg/api/academy', testimoniAcademyRoutes)
 
 // Gunakan mya routes
 main.use(myaRoutes + '/produk', productRoutes);
