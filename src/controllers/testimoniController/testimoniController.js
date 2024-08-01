@@ -10,16 +10,17 @@ async function getAllTestimonials(req, res) {
     try {
         const limit = parseInt(req.query.limit) || 3;
         const testimonials = await testimoniService.getAllTestimonials(limit);
-        const formattedTestimonials = testimonials.map(testimonial => {
-            const fullName = testimonial.user.userProfiles[0]?.fullName || 'Unknown';
-            return {
-                reviewId: testimonial.reviewId,
-                fullName: fullName,
-                role: testimonial.user.role,
-                comment: testimonial.comment,
-            };
-        });
-        return res.status(200).json(webResponses.successResponse(formattedTestimonials));
+        // const formattedTestimonials = testimonials.map(testimonial => {
+        //     const fullName = testimonial.user.userProfiles[0]?.fullName || 'Unknown';
+        //     return {
+        //         reviewId: testimonial.reviewId,
+        //         fullName: fullName,
+        //         role: testimonial.user.role,
+        //         comment: testimonial.comment,
+        //     };
+        // });
+        // return res.status(200).json(webResponses.successResponse(formattedTestimonials));
+        return res.status(200).json(webResponses.successResponse(testimonials));
     } catch (error) {
         return res.status(500).json(webResponses.errorResponse(error.message));
     }
@@ -32,14 +33,14 @@ async function getTestimonialById(req, res) {
         if (!testimonial) {
             return res.status(404).json(webResponses.errorResponse('Testimoni tidak ditemukan'));
         }
-        const fullName = testimonial.user.userProfiles[0]?.fullName || 'Unknown';
-        const formattedTestimonial = {
-            reviewId: testimonial.reviewId,
-            fullName: fullName,
-            role: testimonial.user.role,
-            comment: testimonial.comment,
-        };
-        return res.status(200).json(webResponses.successResponse(formattedTestimonial));
+        // const fullName = testimonial.user.userProfiles[0]?.fullName || 'Unknown';
+        // const formattedTestimonial = {
+        //     reviewId: testimonial.reviewId,
+        //     fullName: fullName,
+        //     role: testimonial.user.role,
+        //     comment: testimonial.comment,
+        // };
+        return res.status(200).json(webResponses.successResponse(testimonial));
     } catch (error) {
         return res.status(500).json(webResponses.errorResponse(error.message));
     }
