@@ -1,7 +1,8 @@
 const express = require('express');
+const testimoniController = require('../../controllers/testimoniController/testimoniController');
+const { authMiddleware, roleMiddleware, selfOrAdminMiddleware } = require('../../middlewares/authMiddleware');
+
 const router = express.Router();
-const authController = require('../../controllers/authentication/authController');
-const { authMiddleware, verifyToken } = require('../../middlewares/authMiddleware');
 
 router.use((req, res, next) => {
     const allowedOrigins = ['http://92.112.192.81:3000', 'http://127.0.0.1:3000','http://localhost:3001', 'http://127.0.0.1:3001'];
@@ -18,10 +19,10 @@ router.use((req, res, next) => {
     next();
 });
 
-router.post('/register', authController.registerUser);
-router.post('/login', authController.loginUser);
-router.get('/refresh-token', verifyToken, authController.refreshAccessToken);
-router.delete('/logout', authMiddleware, authController.logoutUser);
-router.get('/profile', authMiddleware, authController.getProfile);
+router.get('/testimonials', testimoniController.getAllTestimonials);
+router.get('/testimonials/:id', testimoniController.getTestimonialById);
+router.post('/testimonials', authMiddleware, testimoniController.createTestimonial);
+router.put('/testimonials/:id', testimoniController.updateTestimonial);
+router.delete('/testimonials/:id', testimoniController.deleteTestimonial);
 
 module.exports = router;

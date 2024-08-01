@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const cartController = require('../../controllers/myaController/cartController');
+const cartItemController = require('../../controllers/myaController/cartItemController');
 const authMiddleware = require('../../middlewares/authMiddleware');
 
 
@@ -19,8 +19,10 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/', authMiddleware.authMiddleware, cartController.getCarts);
-router.delete('/clear/', authMiddleware.authMiddleware, cartController.clearCart);
+router.post('/item/:productId', authMiddleware.authMiddleware, cartItemController.addCartItem);
+router.put('/item/bulk', authMiddleware.authMiddleware, cartItemController.bulkUpdateCartItems);
+router.put('/item/:productId', authMiddleware.authMiddleware, cartItemController.updateCartItem);
+router.delete('/item/:productId', authMiddleware.authMiddleware, cartItemController.deleteCartItem);
 
 module.exports = router;
 

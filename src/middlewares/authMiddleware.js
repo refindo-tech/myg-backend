@@ -19,10 +19,10 @@ const authMiddleware = async (req, res, next) => {
             return res.status(404).json(webResponses.errorResponse('User not found.'));
         }
 
-        req.user = user;
+        req.user = { ...decoded, userProfiles: user.userProfiles };
         next();
     } catch (ex) {
-        res.status(400).json(webResponses.errorResponse('Invalid token.'));
+        res.status(401).json(webResponses.errorResponse('Invalid token.'));
     }
 };
 
@@ -46,7 +46,6 @@ const roleMiddleware = (roles) => {
     };
 };
 
-// pakai ini untuk mewajibkan user login untuk mengakses route tertentu
 const verifyToken = async (req, res, next) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) return res.status(401).json(webResponses.errorResponse('No token provided.'));

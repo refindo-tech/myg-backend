@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const productController = require(`../../controllers/myaController/productController`);
+const authMiddleware = require('../../middlewares/authMiddleware');
 
 router.use((req, res, next) => {
-    const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+    const allowedOrigins = ['http://92.112.192.81:3000', 'http://127.0.0.1:3000', 'http://localhost:3001'];
     const origin = req.headers.origin;
 
     if (allowedOrigins.includes(origin)) {
@@ -19,8 +20,8 @@ router.use((req, res, next) => {
 
 router.get('/', productController.getAllProduct);
 router.get('/:id', productController.getProductById);
-router.post('/', productController.createProduct);
-router.put('/:id', productController.updateProduct);
-router.delete('/:id', productController.deleteProduct);
+router.post('/', authMiddleware.verifyToken, productController.createProduct);
+router.put('/:id', authMiddleware.verifyToken, productController.updateProduct);
+router.delete('/:id', authMiddleware.verifyToken, productController.deleteProduct);
 
 module.exports = router;

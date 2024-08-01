@@ -11,3 +11,5 @@ src/models/migrations/
 package-lock.json
 
 uploads/
+
+request.rest
