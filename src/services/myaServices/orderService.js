@@ -182,8 +182,8 @@ class OrderService {
             }
         }
 
-        // const price = product.price.find(p => p.type === label)?.price || 0;
-        const totalPrice = quantity * product.price.find(p => p.type === label)?.price || 0;
+        const price = product.price.find(p => p.type === label)?.price || 0;
+        const totalPrice = quantity * price;
 
         const order = await database.order.create({
             data: {
