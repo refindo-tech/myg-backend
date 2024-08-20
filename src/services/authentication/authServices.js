@@ -78,6 +78,12 @@ async function refreshAccessToken(refreshToken) {
     }
 }
 
+async function findUserByEmail(email) {
+  return await database.user.findUnique({
+    where: { email }
+  });
+}
+
 async function logoutUser(refreshToken) {
     try {
         await database.refreshToken.delete({
@@ -111,6 +117,7 @@ async function getUserProfile(userId) {
 module.exports = {
     registerUser,
     loginUser,
+    findUserByEmail,
     refreshAccessToken,
     logoutUser,
     getUserProfile,
