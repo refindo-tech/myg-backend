@@ -7,58 +7,64 @@ const ajv = new Ajv();
 addFormats(ajv);
 
 async function registerUser(req, res) {
-    console.log('Request Body:', req.body);
+  console.log('Request Body:', req.body);
 
-    const validate = ajv.compile(userRegistrationValidation);
-    const valid = validate(req.body);
+  const validate = ajv.compile(userRegistrationValidation);
+  const valid = validate(req.body);
 
-    if (!valid) {
-        console.log('Validation Errors:', validate.errors);
-        return res.status(400).json({
-            status: 'error',
-            message: 'Invalid input',
-            errors: validate.errors
-        });
-    }
+  if (!valid) {
+      return res.status(400).json({
+          status: 'error',
+          message: 'Invalid input',
+          errorType: 'VALIDATION_ERROR',
+          errors: validate.errors
+      });
+  }
 
-    const { email, password, confirmPassword, userProfile, role = 'MEMBER' } = req.body;
+  const { email, password, confirmPassword, userProfile, role = 'MEMBER' } = req.body;
 
-    if (password !== confirmPassword) {
-        return res.status(400).json({
-            status: 'error',
-            message: 'Passwords do not match'
-        });
-    }
+  if (password !== confirmPassword) {
+      return res.status(400).json({
+          status: 'error',
+          message: 'Passwords do not match',
+          errorType: 'PASSWORD_MISMATCH'
+      });
+  }
 
-    try {
-        const newUser = await authService.registerUser(email, password, userProfile, role);
-        res.status(201).json({
-            status: 'success',
-            message: 'User registered successfully',
-            data: newUser
-        });
-    } catch (error) {
-        console.error(error);
+  try {
+      const newUser = await authService.registerUser(email, password, userProfile, role);
+      res.status(201).json({
+          status: 'success',
+          message: 'User registered successfully',
+          data: newUser
+      });
+  } catch (error) {
+      console.error(error);
 
-        if (error.code === 'P2002' && error.meta && error.meta.target === 'User_email_key') {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Email is already in use'
-            });
-        }
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'User_email_key') {
+          return res.status(400).json({
+              status: 'error',
+              message: 'Email is already in use',
+              errorType: 'EMAIL_DUPLICATE'
+          });
+      }
 
-        res.status(500).json({
-            status: 'error',
-            message: 'Failed to register user',
-            error: error.message
-        });
-    }
+      res.status(500).json({
+          status: 'error',
+          message: 'Failed to register user',
+          errorType: 'INTERNAL_ERROR',
+          error: error.message
+      });
+  }
 }
 
 async function loginUser(req, res) {
     const { email, password } = req.body;
     try {
         const { accessToken, refreshToken, user } = await authService.loginUser(email, password);
+
+        // Hapus token refresh kadalwarsa setelah login berhasil
+        await authService.deleteExpiredRefreshTokens();
 
         // Send refresh token as HTTP-only cookie
         res.cookie('refreshToken', refreshToken, {
@@ -71,7 +77,18 @@ async function loginUser(req, res) {
         res.status(200).json(webResponses.successResponse('User logged in successfully', { accessToken, user }));
     } catch (error) {
         console.error(error);
-        res.status(400).json(webResponses.errorResponse(error.message));
+        let statusCode = 400;
+
+        if (error.message === 'User not found') {
+            statusCode = 404;
+        } else if (error.message === 'Invalid password') {
+          statusCode = 401;
+        }
+
+        res.status(statusCode).json({
+            status: 'error',
+            message: error.message
+        });
     }
 }
 
@@ -83,6 +100,10 @@ async function refreshAccessToken(req, res) {
 
     try {
         const newAccessToken = await authService.refreshAccessToken(refreshToken);
+
+        //hapus token refresh yang sudah kadaluwarsa setelah refresh token berhasil di perbarui
+        await authService.deleteExpiredRefreshTokens();
+
         res.status(200).json(webResponses.successResponse('Access token refreshed successfully', { accessToken: newAccessToken }));
     } catch (error) {
         console.error(error);

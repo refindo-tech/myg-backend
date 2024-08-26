@@ -78,12 +78,6 @@ async function refreshAccessToken(refreshToken) {
     }
 }
 
-async function findUserByEmail(email) {
-  return await database.user.findUnique({
-    where: { email }
-  });
-}
-
 async function logoutUser(refreshToken) {
     try {
         await database.refreshToken.delete({
@@ -114,11 +108,22 @@ async function getUserProfile(userId) {
     return user;
 }
 
+async function deleteExpiredRefreshTokens() {
+  const now = new Date();
+  await database.refreshToken.deleteMany({
+      where: {
+          createdAt: {
+              lt: new Date(now - 7 * 24 * 60 * 60 * 1000) // 7 hari yang lalu
+          }
+      }
+  });
+}
+
 module.exports = {
     registerUser,
     loginUser,
-    findUserByEmail,
     refreshAccessToken,
     logoutUser,
     getUserProfile,
+    deleteExpiredRefreshTokens
 };
