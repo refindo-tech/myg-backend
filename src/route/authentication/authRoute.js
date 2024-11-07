@@ -1,27 +1,18 @@
+// authRoute.js
 const express = require('express');
 const router = express.Router();
 const authController = require('../../controllers/authentication/authController');
-const { authMiddleware, verifyToken } = require('../../middlewares/authMiddleware');
+const { authMiddleware, selfOrAdminMiddleware, verifyToken } = require('../../middlewares/authMiddleware');
+const corsMiddleware = require('../../middlewares/corsMiddleware');
 
-router.use((req, res, next) => {
-    const allowedOrigins = ['http://92.112.192.81:3000', 'http://127.0.0.1:3000','http://localhost:3001', 'http://127.0.0.1:3001', 'https://myg.app'];
-    const origin = req.headers.origin;
+// Apply CORS middleware
+router.use(corsMiddleware);
 
-    if (allowedOrigins.includes(origin)) {
-        res.header("Access-Control-Allow-Origin", origin);
-    }
-    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-    if (req.method === 'OPTIONS') {
-        return res.status(200).send();
-    }
-    next();
-});
-
+// Auth routes
 router.post('/register', authController.registerUser);
-router.post('/login', authController.loginUser);
+router.post('/login', authController.login);
 router.get('/refresh-token', verifyToken, authController.refreshAccessToken);
-router.delete('/logout', authMiddleware, authController.logoutUser);
+router.delete('/logout', authMiddleware, authController.logout);
 router.get('/profile', authMiddleware, authController.getProfile);
 
 module.exports = router;
