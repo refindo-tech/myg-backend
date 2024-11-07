@@ -10,9 +10,9 @@ const main = express();
 
 // Konfigurasi CORS
 const corsOptions = {
-    origin: ['http://92.112.192.81:3000', 'http://localhost:3001', 'http://127.0.0.1:3000','http://127.0.0.1:3001', 'https://myg.app'],
+    origin: ['http://92.112.192.81:3000', 'http://127.0.0.1:3000','http://localhost:3001', 'http://127.0.0.1:3001', 'https://myg.app'],
     credentials: true,
-    methods: ['GET', 'PUT', 'POST', 'DELETE'],
+    methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
 };
 main.use(cors(corsOptions));
@@ -29,14 +29,6 @@ main.use('/uploads', (req, res, next) => {
     console.log(`Request to static file: ${req.path}`);
     next();
 });
-
-
-// global route
-const testimoniRoutes = require('./route/testimoniRoute/testimoniRoute');
-
-//auth routes
-const authRoutes = require('./route/authentication/authRoute');
-const userRoutes = require('./route/authentication/userRoute');
 
 
 main.use(cors(corsOptions));
@@ -56,8 +48,12 @@ main.use('/uploads', (req, res, next) => {
     next();
 });
 
+// global route
+const testimoniRoutes = require('./route/testimoniRoute/testimoniRoute');
 
 //auth routes
+const authRoutes = require('./route/authentication/authRoute');
+const userRoutes = require('./route/authentication/userRoute');
 
 //detail profile routes
 const detailPembelianRoutes = require('./route/detailProfile/purchaseRoute');
@@ -78,6 +74,9 @@ const orderRoutes = require('./route/myaRoute/orderRoute');
 
 //mybeautica routes
 const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
+
+//admin route
+const adminRoutes = require('./route/authentication/adminRoute');
 
 // Gunakan global routes
 main.use('/myg/api/', testimoniRoutes);
@@ -105,6 +104,8 @@ main.use(myaRoutes + '/order', orderRoutes);
 // Gunakan mybeautica routes
 main.use('/myg/api/layanan', layananRoutes);
 
+// Gunakan Admin Route
+main.use('/admin/adminPage', adminRoutes);
 
 main.listen(PORT, () => {
     console.log('Server is running! port: ' + PORT);

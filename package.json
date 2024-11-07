@@ -7,7 +7,8 @@
     "start": "node --watch src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "prisma migrate dev",
-    "generate": "prisma generate"
+    "generate": "prisma generate",
+    "seed:superadmin": "node seeders/superAdminSeeder.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,7 @@
   },
   "homepage": "https://github.com/refindo-tech/myg-backend#readme",
   "dependencies": {
-    "ajv": "^8.16.0",
+    "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "argon2": "^0.40.3",
     "axios": "^1.7.2",

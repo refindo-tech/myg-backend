@@ -1,97 +1,149 @@
+// testimoniController.js
 const testimoniService = require('../../services/testimoniServices/testimoniServices');
 const webResponses = require('../../helpers/web/webResponses');
 const { createTestimonialSchema, updateTestimonialSchema } = require('../../validators/testimoniValidator/testimoniValidator');
 const Ajv = require('ajv');
+const addFormats = require('ajv-formats');
 
-const ajv = new Ajv();
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv); // Adds support for formats like email
 
+class TestimonialController {
+    async getAllTestimonials(req, res) {
+        try {
+            const limit = Math.max(1, Math.min(parseInt(req.query.limit) || 10, 50)); // Limit antara 1 dan 50
+            const page = Math.max(1, parseInt(req.query.page) || 1); // Default page adalah 1
+            const offset = (page - 1) * limit; // Hitung offset
 
-async function getAllTestimonials(req, res) {
-    try {
-        const limit = parseInt(req.query.limit) || 3;
-        // const isApproved = req.query.isApproved === 'true';
-        //if empty, isApproved will be true, if 1, will also be true, if 0, will be false
-        const isApproved = req.query.isApproved === 'false' || req.query.isApproved === '0' ? false : true;
-        const testimonials = await testimoniService.getAllTestimonials(limit, isApproved);
-        // const formattedTestimonials = testimonials.map(testimonial => {
-        //     const fullName = testimonial.user.userProfiles[0]?.fullName || 'Unknown';
-        //     return {
-        //         reviewId: testimonial.reviewId,
-        //         fullName: fullName,
-        //         role: testimonial.user.role,
-        //         comment: testimonial.comment,
-        //     };
-        // });
-        // return res.status(200).json(webResponses.successResponse(formattedTestimonials));
-        return res.status(200).json(webResponses.successResponse(testimonials));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
-    }
-}
+            const isApproved = req.query.isApproved === 'false' || req.query.isApproved === '0' ? false : true;
+            
+            const testimonials = await testimoniService.getAllTestimonials(limit, offset, isApproved);
 
-async function getTestimonialById(req, res) {
-    try {
-        const { id } = req.params;
-        const testimonial = await testimoniService.getTestimonialById(Number(id));
-        if (!testimonial) {
-            return res.status(404).json(webResponses.errorResponse('Testimoni tidak ditemukan'));
+            return res.status(200).json(webResponses.successResponse(testimonials));
+        } catch (error) {
+            console.error('Get all testimonials error:', error);
+            return res.status(500).json(webResponses.errorResponse('Gagal mengambil data testimoni'));
         }
-        // const fullName = testimonial.user.userProfiles[0]?.fullName || 'Unknown';
-        // const formattedTestimonial = {
-        //     reviewId: testimonial.reviewId,
-        //     fullName: fullName,
-        //     role: testimonial.user.role,
-        //     comment: testimonial.comment,
-        // };
-        return res.status(200).json(webResponses.successResponse(testimonial));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
     }
-}
 
-async function createTestimonial(req, res) {
-    try {
-        const { body } = req;
-        const valid = ajv.validate(createTestimonialSchema, body);
-        if (!valid) {
-            return res.status(400).json(webResponses.errorResponse(ajv.errors));
+
+    async getTestimonialById(req, res) {
+        try {
+            const { id } = req.params;
+            
+            if (!id || isNaN(id)) {
+                return res.status(400).json(webResponses.errorResponse('ID testimoni tidak valid'));
+            }
+
+            const testimonial = await testimoniService.getTestimonialById(Number(id));
+            return res.status(200).json(webResponses.successResponse(testimonial));
+        } catch (error) {
+            if (error.message === 'Testimonial not found') {
+                return res.status(404).json(webResponses.errorResponse('Testimoni tidak ditemukan'));
+            }
+            console.error('Get testimonial by id error:', error);
+            return res.status(500).json(webResponses.errorResponse('Gagal mengambil data testimoni'));
         }
-        const testimonial = await testimoniService.createTestimonial(body);
-        return res.status(201).json(webResponses.successResponse(testimonial));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
     }
-}
 
-async function updateTestimonial(req, res) {
-    try {
-        const { id } = req.params;
-        const { body } = req;
-        const valid = ajv.validate(updateTestimonialSchema, body);
-        if (!valid) {
-            return res.status(400).json(webResponses.errorResponse(ajv.errors));
+    async createTestimonial(req, res) {
+        try {
+            const valid = ajv.validate(createTestimonialSchema, req.body);
+            
+            if (!valid) {
+                const errors = ajv.errors.map(error => ({
+                    field: error.instancePath.slice(1),
+                    message: error.message
+                }));
+                return res.status(400).json(webResponses.errorResponse('Data tidak valid', errors));
+            }
+
+            const testimonial = await testimoniService.createTestimonial(req.body);
+            return res.status(201).json(webResponses.successResponse(testimonial, 'Testimoni berhasil dibuat'));
+        } catch (error) {
+            console.error('Create testimonial error:', error);
+            return res.status(500).json(webResponses.errorResponse('Gagal membuat testimoni'));
         }
-        const testimonial = await testimoniService.updateTestimonial(Number(id), body);
-        return res.status(200).json(webResponses.successResponse(testimonial));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
+    }
+
+    async updateTestimonial(req, res) {
+        try {
+            const { id } = req.params;
+            
+            if (!id || isNaN(id)) {
+                return res.status(400).json(webResponses.errorResponse('ID testimoni tidak valid'));
+            }
+
+            const valid = ajv.validate(updateTestimonialSchema, req.body);
+            if (!valid) {
+                const errors = ajv.errors.map(error => ({
+                    field: error.instancePath.slice(1),
+                    message: error.message
+                }));
+                return res.status(400).json(webResponses.errorResponse('Data tidak valid', errors));
+            }
+
+            const testimonial = await testimoniService.updateTestimonial(Number(id), req.body);
+            return res.status(200).json(webResponses.successResponse(testimonial, 'Testimoni berhasil diperbarui'));
+        } catch (error) {
+            if (error.message === 'Testimonial not found') {
+                return res.status(404).json(webResponses.errorResponse('Testimoni tidak ditemukan'));
+            }
+            console.error('Update testimonial error:', error);
+            return res.status(500).json(webResponses.errorResponse('Gagal memperbarui testimoni'));
+        }
+    }
+
+    async deleteTestimonial(req, res) {
+        try {
+            const { id } = req.params;
+            
+            if (!id || isNaN(id)) {
+                return res.status(400).json(webResponses.errorResponse('ID testimoni tidak valid'));
+            }
+
+            await testimoniService.deleteTestimonial(Number(id));
+            return res.status(200).json(webResponses.successResponse(null, 'Testimoni berhasil dihapus'));
+        } catch (error) {
+            if (error.message === 'Testimonial not found') {
+                return res.status(404).json(webResponses.errorResponse('Testimoni tidak ditemukan'));
+            }
+            console.error('Delete testimonial error:', error);
+            return res.status(500).json(webResponses.errorResponse('Gagal menghapus testimoni'));
+        }
+    }
+
+    
+    async toggleApprovalStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { isApproved } = req.body;
+            
+            // Validasi ID
+            if (!id || isNaN(id)) {
+                return res.status(400).json(webResponses.errorResponse('ID testimoni tidak valid'));
+            }
+
+            // Validasi isApproved harus boolean
+            if (typeof isApproved !== 'boolean') {
+                return res.status(400).json(webResponses.errorResponse('Status approval harus berupa boolean (true/false)'));
+            }
+
+            const testimonial = await testimoniService.toggleApprovalStatus(Number(id), isApproved);
+            
+            const message = isApproved 
+                ? 'Testimoni berhasil disetujui' 
+                : 'Persetujuan testimoni berhasil dibatalkan';
+                
+            return res.status(200).json(webResponses.successResponse(testimonial, message));
+        } catch (error) {
+            if (error.message === 'Testimonial not found') {
+                return res.status(404).json(webResponses.errorResponse('Testimoni tidak ditemukan'));
+            }
+            console.error('Toggle approval status error:', error);
+            return res.status(500).json(webResponses.errorResponse('Gagal mengubah status persetujuan testimoni'));
+        }
     }
 }
 
-async function deleteTestimonial(req, res) {
-    try {
-        const { id } = req.params;
-        const testimonial = await testimoniService.deleteTestimonial(Number(id));
-        return res.status(200).json(webResponses.successResponse(testimonial));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
-    }
-}
-
-module.exports = {
-    getAllTestimonials,
-    getTestimonialById,
-    createTestimonial,
-    updateTestimonial,
-    deleteTestimonial,
-};
+module.exports = new TestimonialController();

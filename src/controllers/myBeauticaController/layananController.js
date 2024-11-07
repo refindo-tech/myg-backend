@@ -1,101 +1,192 @@
-const express = require('express');
 const layananService = require('../../services/myBeauticaServices/layananServices');
 const webResponses = require('../../helpers/web/webResponses');
+const { ValidationError } = require('../../helpers/errors/customErrors');
 const { createLayananSchema, updateLayananSchema } = require('../../validators/myBeauticaValidator/layananValidator');
+const { layananUpload } = require('../../middlewares/uploadMiddleware');
 const Ajv = require('ajv');
 const multer = require('multer');
-const path = require('path');
 
-const ajv = new Ajv();
-const upload = multer({ dest: 'uploads/' }); // Tentukan folder untuk menyimpan file yang diunggah
+class LayananController {
+  constructor() {
+    this.ajv = new Ajv({
+      allErrors: true,
+      removeAdditional: true,
+      useDefaults: true,
+      coerceTypes: true
+    });
 
-async function getAllLayanan(req, res) {
+    // Kompilasi schema untuk validasi
+    this.validateCreate = this.ajv.compile(createLayananSchema);
+    this.validateUpdate = this.ajv.compile(updateLayananSchema);
+  }
+
+  getAllLayanan = async (req, res) => {
     try {
-        const layanan = await layananService.getAllLayanan();
-        return res.status(200).json(webResponses.successResponse(layanan));
+      const layanan = await layananService.getAllLayanan();
+      return res.status(200).json(
+        webResponses.successResponse('Layanan retrieved successfully', layanan)
+      );
     } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
+      return this.handleError(error, res);
     }
+  };
+
+  getLayananById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const layanan = await layananService.getLayananById(Number(id));
+      
+      if (!layanan) {
+        throw new ValidationError('Layanan tidak ditemukan');
+      }
+
+      return res.status(200).json(
+        webResponses.successResponse('Layanan retrieved successfully', layanan)
+      );
+    } catch (error) {
+      return this.handleError(error, res);
+    }
+  };
+
+  createLayanan = async (req, res) => {
+    try {
+      console.log('Request body:', req.body);
+      console.log('Uploaded file:', req.file);
+
+      // Validate request body
+      const data = {
+        ...req.body,
+        price: Number(req.body.price),
+        viewCount: Number(req.body.viewCount) || 0
+      };
+
+      const isValid = this.validateCreate(data);
+      if (!isValid) {
+        const errors = this.validateCreate.errors.map(err => ({
+          field: err.instancePath.substring(1) || err.params.missingProperty,
+          message: err.message
+        }));
+        throw new ValidationError('Validation failed', errors);
+      }
+
+      // Add image path if file was uploaded
+      if (req.file) {
+        data.imageUrl = req.file.path;
+      }
+
+      const layanan = await layananService.createLayanan(data);
+
+      return res.status(201).json(
+        webResponses.successResponse('Layanan created successfully', layanan)
+      );
+    } catch (error) {
+      // Clean up uploaded file if there's an error
+      if (req.file) {
+        await layananUpload.deleteFile(req.file.path);
+      }
+      return this.handleError(error, res);
+    }
+  };
+
+  updateLayanan = async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log('Updating layanan:', id);
+      console.log('Request body:', req.body);
+      console.log('Uploaded file:', req.file);
+
+      // Get existing layanan
+      const existingLayanan = await layananService.getLayananById(Number(id));
+      if (!existingLayanan) {
+        throw new ValidationError('Layanan tidak ditemukan');
+      }
+
+      // Prepare update data
+      const data = {
+        ...req.body,
+        price: req.body.price ? Number(req.body.price) : undefined,
+        viewCount: req.body.viewCount ? Number(req.body.viewCount) : undefined
+      };
+
+      // Validate update data
+      const isValid = this.validateUpdate(data);
+      if (!isValid) {
+        const errors = this.validateUpdate.errors.map(err => ({
+          field: err.instancePath.substring(1) || err.params.missingProperty,
+          message: err.message
+        }));
+        throw new ValidationError('Validation failed', errors);
+      }
+
+      // Handle file update
+      if (req.file) {
+        // Delete old image if exists
+        if (existingLayanan.imageUrl) {
+          await layananUpload.deleteFile(existingLayanan.imageUrl);
+        }
+        data.imageUrl = req.file.path;
+      }
+
+      const updatedLayanan = await layananService.updateLayanan(Number(id), data);
+
+      return res.status(200).json(
+        webResponses.successResponse('Layanan updated successfully', updatedLayanan)
+      );
+    } catch (error) {
+      // Clean up uploaded file if there's an error
+      if (req.file) {
+        await layananUpload.deleteFile(req.file.path);
+      }
+      return this.handleError(error, res);
+    }
+  };
+
+  deleteLayanan = async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get layanan first to get image path
+      const layanan = await layananService.getLayananById(Number(id));
+      if (!layanan) {
+        throw new ValidationError('Layanan tidak ditemukan');
+      }
+
+      // Delete the layanan
+      await layananService.deleteLayanan(Number(id));
+
+      // Delete associated image if exists
+      if (layanan.imageUrl) {
+        await layananUpload.deleteFile(layanan.imageUrl);
+      }
+
+      return res.status(200).json(
+        webResponses.successResponse('Layanan deleted successfully', { id })
+      );
+    } catch (error) {
+      return this.handleError(error, res);
+    }
+  };
+
+  handleError(error, res) {
+    console.error('Error details:', error);
+
+    if (error instanceof ValidationError) {
+      return res.status(400).json(
+        webResponses.errorResponse(error.message, error.details)
+      );
+    }
+
+    if (error instanceof multer.MulterError) {
+      return res.status(400).json(
+        webResponses.errorResponse('File upload error: ' + error.message)
+      );
+    }
+
+    return res.status(500).json(
+      webResponses.errorResponse('Internal server error')
+    );
+  }
 }
 
-async function getLayananById(req, res) {
-    try {
-        const { id } = req.params;
-        const layanan = await layananService.getLayananById(Number(id));
-        if (!layanan) {
-            return res.status(404).json(webResponses.errorResponse('Layanan tidak ditemukan'));
-        }
-        return res.status(200).json(webResponses.successResponse(layanan));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
-    }
-}
-
-async function createLayanan(req, res) {
-    try {
-        const { body, file } = req;
-
-        // Konversi tipe data yang diperlukan
-        if (body.price) body.price = Number(body.price);
-        if (body.viewCount) body.viewCount = Number(body.viewCount);
-
-        const valid = ajv.validate(createLayananSchema, body);
-        if (!valid) {
-            return res.status(400).json(webResponses.errorResponse(ajv.errors));
-        }
-
-        // Tambahkan path file gambar ke body jika ada file yang diunggah
-        if (file) {
-            body.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${file.filename}`;
-        }
-
-        const layanan = await layananService.createLayanan(body);
-        return res.status(201).json(webResponses.successResponse(layanan));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
-    }
-}
-
-async function updateLayanan(req, res) {
-    try {
-        const { id } = req.params;
-        const { body, file } = req;
-
-        // Konversi tipe data yang diperlukan
-        if (body.price) body.price = Number(body.price);
-        if (body.viewCount) body.viewCount = Number(body.viewCount);
-
-        const valid = ajv.validate(updateLayananSchema, body);
-        if (!valid) {
-            return res.status(400).json(webResponses.errorResponse(ajv.errors));
-        }
-
-        // Tambahkan path file gambar ke body jika ada file yang diunggah
-        if (file) {
-            body.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${file.filename}`;
-        }
-
-        const layanan = await layananService.updateLayanan(Number(id), body);
-        return res.status(200).json(webResponses.successResponse(layanan));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
-    }
-}
-
-async function deleteLayanan(req, res) {
-    try {
-        const { id } = req.params;
-        const layanan = await layananService.deleteLayanan(Number(id));
-        return res.status(200).json(webResponses.successResponse(layanan));
-    } catch (error) {
-        return res.status(500).json(webResponses.errorResponse(error.message));
-    }
-}
-
-module.exports = {
-    getAllLayanan,
-    getLayananById,
-    createLayanan: [upload.single('imageUrl'), createLayanan], // middleware multer untuk menangani file upload
-    updateLayanan: [upload.single('imageUrl'), updateLayanan], // middleware multer untuk menangani file upload
-    deleteLayanan,
-};
+// Export instance of controller
+module.exports = new LayananController();

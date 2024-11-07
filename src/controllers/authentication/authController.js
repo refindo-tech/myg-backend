@@ -1,159 +1,262 @@
+// authController.js
 const webResponses = require('../../helpers/web/webResponses');
 const authService = require('../../services/authentication/authServices');
-const { userRegistrationValidation } = require('../../validators/authentication/authValidator');
+const { userRegistrationValidation, loginValidation } = require('../../validators/authentication/authValidator');
+const { ValidationError, AuthenticationError } = require('../../helpers/errors/customErrors');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
-const ajv = new Ajv();
-addFormats(ajv);
 
-async function registerUser(req, res) {
-  console.log('Request Body:', req.body);
-
-  const validate = ajv.compile(userRegistrationValidation);
-  const valid = validate(req.body);
-
-  if (!valid) {
-      return res.status(400).json({
-          status: 'error',
-          message: 'Invalid input',
-          errorType: 'VALIDATION_ERROR',
-          errors: validate.errors
-      });
+class AuthController {
+  constructor() {
+    this.ajv = new Ajv();
+    addFormats(this.ajv);
   }
 
-  const { email, password, confirmPassword, userProfile, role = 'MEMBER' } = req.body;
+  login = async (req, res) => {
+    try {
+      const { email, password, type = 'user' } = req.body;
 
-  if (password !== confirmPassword) {
-      return res.status(400).json({
-          status: 'error',
-          message: 'Passwords do not match',
-          errorType: 'PASSWORD_MISMATCH'
-      });
-  }
-
-  try {
-      const newUser = await authService.registerUser(email, password, userProfile, role);
-      res.status(201).json({
-          status: 'success',
-          message: 'User registered successfully',
-          data: newUser
-      });
-  } catch (error) {
-      console.error(error);
-
-      if (error.code === 'P2002' && error.meta && error.meta.target === 'User_email_key') {
-          return res.status(400).json({
-              status: 'error',
-              message: 'Email is already in use',
-              errorType: 'EMAIL_DUPLICATE'
-          });
+      // Validate input
+      if (!email || !password) {
+        throw new ValidationError(
+          'Email dan password harus diisi',
+          null,
+          'MISSING_CREDENTIALS'
+        );
       }
 
-      res.status(500).json({
-          status: 'error',
-          message: 'Failed to register user',
-          errorType: 'INTERNAL_ERROR',
-          error: error.message
+      // Validate type
+      if (!['user', 'admin'].includes(type)) {
+        throw new ValidationError(
+          'Tipe akun tidak valid',
+          null,
+          'INVALID_ACCOUNT_TYPE'
+        );
+      }
+
+      const { accessToken, refreshToken, account, accountType } = 
+        await authService.login(email, password, type);
+
+      await authService.deleteExpiredRefreshTokens();
+
+      this.#setRefreshTokenCookie(res, refreshToken);
+
+      return res.status(200).json(
+        webResponses.successResponse(
+          'Login berhasil', 
+          { 
+            accessToken, 
+            account,
+            accountType
+          }
+        )
+      );
+    } catch (error) {
+      this.#handleError(res, error);
+    }
+  };
+
+
+  registerUser = async (req, res) => {
+    try {
+      const validate = this.ajv.compile(userRegistrationValidation);
+      if (!validate(req.body)) {
+        throw new ValidationError('Invalid input', validate.errors);
+      }
+
+      const { email, password, confirmPassword, userProfile, role = 'MEMBER' } = req.body;
+
+      if (password !== confirmPassword) {
+        throw new ValidationError('Passwords do not match');
+      }
+
+      const newUser = await authService.registerUser(email, password, userProfile, role);
+      return res.status(201).json(webResponses.successResponse('User registered successfully', newUser));
+    } catch (error) {
+      this.#handleError(res, error);
+    }
+  };
+
+  refreshAccessToken = async (req, res) => {
+    try {
+      const oldRefreshToken = req.cookies.refreshToken;
+      
+      // Tambahkan logging
+      console.log('Cookies received:', req.cookies);
+      console.log('Refresh token from cookies:', oldRefreshToken);
+      
+      if (!oldRefreshToken) {
+        throw new AuthenticationError(
+          'Refresh token tidak ditemukan dalam cookies',
+          'REFRESH_TOKEN_MISSING'
+        );
+      }
+  
+      const { accessToken, refreshToken, tokenType } = 
+        await authService.refreshAccessToken(oldRefreshToken);
+      
+      this.#setRefreshTokenCookie(res, refreshToken);
+  
+      return res.status(200).json(
+        webResponses.successResponse(
+          'Token berhasil diperbarui', 
+          { 
+            accessToken,
+            tokenType
+          }
+        )
+      );
+    } catch (error) {
+      // Log error untuk debugging
+      console.error('Refresh token error:', {
+        error: error.message,
+        type: error.type,
+        stack: error.stack
       });
+
+      // Clear refresh token cookie jika terjadi error
+      res.clearCookie('refreshToken');
+      
+      this.#handleError(res, error);
+    }
+  };
+  
+  logout = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+        console.log('Refresh Token:', refreshToken); // Tambahkan logging
+        
+        if (!refreshToken) {
+            throw new AuthenticationError('No refresh token provided');
+        }
+
+        await authService.logout(refreshToken);
+        res.clearCookie('refreshToken');
+        return res.status(200).json(webResponses.successResponse('User logged out successfully'));
+    } catch (error) {
+        console.error('Logout error:', error); // Tambahkan logging
+        this.#handleError(res, error);
+    }
+  };
+
+  getProfile = async (req, res) => {
+    try {
+      // Ambil userId dari token yang sudah di-decode oleh middleware
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        throw new AuthenticationError(
+          'User ID tidak ditemukan',
+          'USER_ID_MISSING'
+        );
+      }
+
+      const user = await authService.getUserProfile(userId);
+      const profileData = this.#formatUserProfile(user);
+      
+      return res.status(200).json(
+        webResponses.successResponse(
+          'Profil user berhasil diambil', 
+          profileData
+        )
+      );
+    } catch (error) {
+      this.#handleError(res, error);
+    }
+  };
+
+  // Perbaikan method formatUserProfile
+  #formatUserProfile(user) {
+    if (!user) return null;
+
+    const profile = user.userProfiles[0] || {};
+    
+    return {
+      userId: user.userId,
+      email: user.email,
+      userLabel: user.userLabel,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      profile: {
+        fullName: profile.fullName || null,
+        profilePicture: profile.profilePicture || null,
+        phoneNumber: profile.phoneNumber || null,
+        address: profile.address || null,
+        birthdate: profile.birthdate || null,
+        studioName: profile.studioName || null,
+        ktpPicture: profile.ktpPicture || null,
+        studioLogo: profile.studioLogo || null
+      }
+    };
+  }
+
+  #setRefreshTokenCookie(res, refreshToken) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    // Tambahkan logging
+    console.log('Setting cookie with config:', {
+      isProduction,
+      secure: isProduction || process.env.NODE_ENV === 'development',
+      sameSite: isProduction ? 'none' : 'lax'
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: isProduction || process.env.NODE_ENV === 'development',
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/' // Tambahkan ini
+    });
+  }
+
+
+  #handleError(res, error) {
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      type: error.type,
+      details: error.details
+    });
+    
+    if (error instanceof ValidationError) {
+      return res.status(400).json(
+        webResponses.errorResponse(
+          error.message,
+          {
+            type: error.type || 'VALIDATION_ERROR',
+            details: error.details
+          }
+        )
+      );
+    }
+    
+    if (error instanceof AuthenticationError) {
+      const statusCode = [
+        'REFRESH_TOKEN_EXPIRED',
+        'INVALID_REFRESH_TOKEN',
+        'TOKEN_REUSE_DETECTED'
+      ].includes(error.type) ? 403 : 401;
+
+      return res.status(statusCode).json(
+        webResponses.errorResponse(
+          error.message,
+          {
+            type: error.type || 'AUTHENTICATION_ERROR'
+          }
+        )
+      );
+    }
+    
+    return res.status(500).json(
+      webResponses.errorResponse(
+        'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+        {
+          type: 'INTERNAL_SERVER_ERROR'
+        }
+      )
+    );
   }
 }
 
-async function loginUser(req, res) {
-    const { email, password } = req.body;
-    try {
-        const { accessToken, refreshToken, user } = await authService.loginUser(email, password);
-
-        // Hapus token refresh kadalwarsa setelah login berhasil
-        await authService.deleteExpiredRefreshTokens();
-
-        // Send refresh token as HTTP-only cookie
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-
-        res.status(200).json(webResponses.successResponse('User logged in successfully', { accessToken, user }));
-    } catch (error) {
-        console.error(error);
-        let statusCode = 400;
-
-        if (error.message === 'User not found') {
-            statusCode = 404;
-        } else if (error.message === 'Invalid password') {
-          statusCode = 401;
-        }
-
-        res.status(statusCode).json({
-            status: 'error',
-            message: error.message
-        });
-    }
-}
-
-async function refreshAccessToken(req, res) {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-        return res.status(401).json(webResponses.errorResponse('No refresh token provided'));
-    }
-
-    try {
-        const newAccessToken = await authService.refreshAccessToken(refreshToken);
-
-        //hapus token refresh yang sudah kadaluwarsa setelah refresh token berhasil di perbarui
-        await authService.deleteExpiredRefreshTokens();
-
-        res.status(200).json(webResponses.successResponse('Access token refreshed successfully', { accessToken: newAccessToken }));
-    } catch (error) {
-        console.error(error);
-        res.status(401).json(webResponses.errorResponse('Invalid refresh token'));
-    }
-}
-
-async function logoutUser(req, res) {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-        return res.status(401).json(webResponses.errorResponse('No refresh token provided'));
-    }
-
-    try {
-        await authService.logoutUser(refreshToken);
-        res.clearCookie('refreshToken');
-        res.status(200).json(webResponses.successResponse('User logged out successfully'));
-    } catch (error) {
-        console.error(error);
-        res.status(400).json(webResponses.errorResponse('Failed to logout user'));
-    }
-}
-
-async function getProfile(req, res) {
-    try {
-        const userId = req.user.userId;
-        const user = await authService.getUserProfile(userId);
-
-        const result = {
-            userId: user.userId,
-            email: user.email,
-            userLabel: user.userLabel,
-            role: user.role,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            profilePicture: user.userProfiles[0]?.profilePicture || null,
-            fullName: user.userProfiles[0]?.fullName || 'Unknown',
-        };
-
-        res.status(200).json(webResponses.successResponse('User profile fetched successfully', result));
-    } catch (error) {
-        console.error(error);
-        res.status(500).json(webResponses.errorResponse('Failed to fetch user profile'));
-    }
-}
-
-module.exports = {
-    registerUser,
-    loginUser,
-    refreshAccessToken,
-    logoutUser,
-    getProfile
-};
+module.exports = new AuthController();
