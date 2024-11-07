@@ -10,7 +10,7 @@ datasource db {
 model User {
   userId    Int        @id @default(autoincrement())
   email     String     @unique
-  password  String
+  password  String     @db.VarChar(255)
   userLabel UserLabel?
   role      UserRole   @default(MEMBER)
   createdAt DateTime   @default(now())
@@ -38,10 +38,15 @@ model User {
 model RefreshToken {
   id        Int      @id @default(autoincrement())
   token     String   @unique @db.VarChar(512)
-  userId    Int
+  userId    Int?
+  adminId   Int?
+  familyId  String
+  isUsed    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [userId])
+
+  user       User?     @relation(fields: [userId], references: [userId])
+  admin      Admin?    @relation(fields: [adminId], references: [adminId])
 }
 
 model Admin {
@@ -49,23 +54,28 @@ model Admin {
   name        String
   email       String   @unique
   password    String
-  permissions String
+  profilePicture String?  @db.VarChar(512)
+  userLabel   UserLabel?
+  role        UserRole   @default(ADMIN)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
+
+  refreshToken RefreshToken[]
 }
 
 model UserProfile {
   profileId      Int      @id @default(autoincrement())
   userId         Int
   fullName       String
-  address        String
-  phoneNumber    String
-  socialMedia    String
-  profilePicture String?
-  studioName     String? // Mengubah field menjadi nullable
-  ktpPicture     String?
-  studioLogo     String?
-  birthdate      DateTime
+  address        String?
+  phoneNumber    String?
+  socialMedia    String?
+  profilePicture String?  @db.VarChar(512)
+  studioName     String?  @db.VarChar(512)
+  ktpPicture     String?  @db.VarChar(512)
+  studioLogo     String?  @db.VarChar(512)
+  birthdate      DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now())
   user           User     @relation(fields: [userId], references: [userId])
@@ -282,7 +292,7 @@ model BeautyService {
   title       String
   description String  @db.VarChar(5120)
   price       Decimal
-  imageUrl    String?
+  imageUrl    String? @db.VarChar(512)
   viewCount   Int     @default(0)
 
   createdAt          DateTime            @default(now())
@@ -325,7 +335,9 @@ model Review {
 }
 
 enum UserLabel {
-  SAHABAT_MY_ACADEMI
+  MYA
+  MY_ACADEMI
+  MY_BEAUTICA
   RETAIL
   AGENT
   DISTRIBUTOR
