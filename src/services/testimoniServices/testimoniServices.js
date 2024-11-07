@@ -1,95 +1,122 @@
+// testimoniService.js
 const { database } = require('../../helpers/config/db');
 
-async function getAllTestimonials(limit, isApproved = true) {
-    // console.log('isApproved:', isApproved);
-    const testimonials = await database.review.findMany({
-        take: limit,
-        where: { isApproved: isApproved ? true : undefined },
-        // include: {
-        //     user: {
-        //         include: {
-        //             userProfiles: true,
-        //         },
-        //     },
-        // },
-    });
+class TestimonialService {
+    async getAllTestimonials(limit = 6, offset = 0, isApproved = true) {
+        try {
+            return await database.review.findMany({
+                take: limit,
+                skip: offset,  // Tambahkan offset untuk pagination
+                where: { 
+                    isApproved: isApproved ? true : undefined 
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
+            });
+        } catch (error) {
+            throw new Error(`Failed to fetch testimonials: ${error.message}`);
+        }
+    }
 
-    // Mengubah nilai null pada studioName menjadi string kosong
-    // testimonials.forEach(testimonial => {
-    //     testimonial.user.userProfiles.forEach(profile => {
-    //         profile.studioName = profile.studioName || '';
-    //     });
-    // });
 
-    return testimonials;
+    async getTestimonialById(id) {
+        try {
+            const testimonial = await database.review.findUnique({
+                where: { reviewId: Number(id) }
+            });
+            
+            if (!testimonial) {
+                throw new Error('Testimonial not found');
+            }
+            
+            return testimonial;
+        } catch (error) {
+            throw new Error(`Failed to fetch testimonial: ${error.message}`);
+        }
+    }
+
+    async createTestimonial(data) {
+        try {
+            return await database.review.create({
+                data: {
+                    name: data.name.trim(),
+                    email: data.email.toLowerCase().trim(),
+                    role: data.role.trim(),
+                    comment: data.comment.trim(),
+                    isApproved: false, // Default to false for moderation
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                }
+            });
+        } catch (error) {
+            throw new Error(`Failed to create testimonial: ${error.message}`);
+        }
+    }
+
+    async updateTestimonial(id, data) {
+        try {
+            // Check if testimonial exists
+            const exists = await this.getTestimonialById(id);
+            
+            if (!exists) {
+                throw new Error('Testimonial not found');
+            }
+
+            return await database.review.update({
+                where: { reviewId: Number(id) },
+                data: {
+                    name: data.name?.trim(),
+                    email: data.email?.toLowerCase().trim(),
+                    role: data.role?.trim(),
+                    comment: data.comment?.trim(),
+                    updatedAt: new Date(),
+                }
+            });
+        } catch (error) {
+            throw new Error(`Failed to update testimonial: ${error.message}`);
+        }
+    }
+
+    async deleteTestimonial(id) {
+        try {
+            // Check if testimonial exists
+            const exists = await this.getTestimonialById(id);
+            
+            if (!exists) {
+                throw new Error('Testimonial not found');
+            }
+
+            return await database.review.delete({
+                where: { reviewId: Number(id) }
+            });
+        } catch (error) {
+            throw new Error(`Failed to delete testimonial: ${error.message}`);
+        }
+    }
+
+    
+    async toggleApprovalStatus(id, status) {
+        try {
+            // Check if testimonial exists
+            const exists = await this.getTestimonialById(id);
+            
+            if (!exists) {
+                throw new Error('Testimonial not found');
+            }
+
+            return await database.review.update({
+                where: { reviewId: Number(id) },
+                data: {
+                    isApproved: status,
+                    updatedAt: new Date(),
+                }
+            });
+        } catch (error) {
+            throw new Error(`Failed to update approval status: ${error.message}`);
+        }
+    }
 }
 
-async function getTestimonialById(id) {
-    const testimonial = await database.review.findUnique({
-        where: { reviewId: id },
-        // include: {
-        //     user: {
-        //         include: {
-        //             userProfiles: true,
-        //         },
-        //     },
-        // },
-    });
 
-    // if (testimonial) {
-    //     // Mengubah nilai null pada studioName menjadi string kosong
-    //     testimonial.user.userProfiles.forEach(profile => {
-    //         profile.studioName = profile.studioName || '';
-    //     });
-    // }
-
-    return testimonial;
-}
-
-async function createTestimonial(data) {
-    // Validasi userId
-    // const userExists = await database.user.findUnique({
-    //     where: { userId: data.userId },
-    // });
-
-    // if (!userExists) {
-    //     throw new Error('Invalid userId. The specified user does not exist.');
-    // }
-
-    return await database.review.create({
-        data: {
-            // userId: data.userId,
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            comment: data.comment,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        },
-    });
-}
-
-async function updateTestimonial(id, data) {
-    return await database.review.update({
-        where: { reviewId: id },
-        data: {
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            comment: data.comment,
-            updatedAt: new Date(),
-        },
-    });
-}
-
-async function deleteTestimonial(id) {
-    return await database.review.delete({ where: { reviewId: id } });
-}
-
-module.exports = { 
-    getAllTestimonials,
-    getTestimonialById,
-    createTestimonial,
-    updateTestimonial,
-    deleteTestimonial,
-};
+module.exports = new TestimonialService();

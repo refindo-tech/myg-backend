@@ -1,10 +1,17 @@
+//userServices.js
 const { database } = require('../../helpers/config/db');
 const argon2 = require('argon2');
 
 async function getAllUsers() {
     return await database.user.findMany({
-        include: {
-            userProfiles: true,
+        select: {
+            userId: true,
+            email: true,
+            userLabel: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+            userProfiles: true
         }
     });
 }
@@ -12,8 +19,14 @@ async function getAllUsers() {
 async function getUserById(userId) {
     return await database.user.findUnique({
         where: { userId },
-        include: {
-            userProfiles: true,
+        select: {
+            userId: true,
+            email: true,
+            userLabel: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+            userProfiles: true
         }
     });
 }
