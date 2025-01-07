@@ -33,6 +33,8 @@ model User {
   wishlists          Wishlist[]
   guidelines         Guideline[]         @relation("GuidelineUploader")
   beautyAppointments BeautyAppointment[]
+
+  @@map("user")
 }
 
 model RefreshToken {
@@ -47,6 +49,7 @@ model RefreshToken {
 
   user       User?     @relation(fields: [userId], references: [userId])
   admin      Admin?    @relation(fields: [adminId], references: [adminId])
+  @@map("refreshtoken")
 }
 
 model Admin {
@@ -62,6 +65,7 @@ model Admin {
   updatedAt   DateTime @default(now())
 
   refreshToken RefreshToken[]
+  @@map("admin")
 }
 
 model UserProfile {
@@ -79,6 +83,7 @@ model UserProfile {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now())
   user           User     @relation(fields: [userId], references: [userId])
+  @@map("userprofile")
 }
 
 
@@ -87,6 +92,7 @@ model UserCoin {
   userId Int
   value  Int
   user   User @relation(fields: [userId], references: [userId])
+  @@map("usecoin")
 }
 
 model SocialMedia {
@@ -95,6 +101,7 @@ model SocialMedia {
   socialMediaAccount String
   socialMediaType    SocialMediaType
   user               User            @relation(fields: [userId], references: [userId])
+  @@map("socialmedia")
 }
 
 model Notification {
@@ -104,6 +111,7 @@ model Notification {
   message          String
   sentAt           DateTime         @default(now())
   user             User             @relation(fields: [userId], references: [userId])
+  @@map("notification")
 }
 
 model Training {
@@ -120,9 +128,10 @@ model Training {
   materi       String?    @db.Text
   benefit      String?    @db.Text
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
   materials    Material[]
   user         User       @relation("TrainingUploader", fields: [uploadedBy], references: [userId])
+  @@map("training")
 }
 
 model Material {
@@ -134,15 +143,16 @@ model Material {
   membershipLevel  MembershipLevel
   banner           String
   brosur           String?
-  formRegistration String
-  ebook            String
-  youtubeVideo     String
-  zoomRecord       String
+  formRegistration String?
+  ebook            String?
+  youtubeVideo     String?
+  zoomRecord       String?
   uploadedBy       Int
   createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now()) @updatedAt
   training         Training        @relation(fields: [trainingId], references: [trainingId])
   user             User            @relation("MaterialUploader", fields: [uploadedBy], references: [userId])
+  @@map("material")
 }
 
 model Message {
@@ -155,6 +165,7 @@ model Message {
   isDeleted  Boolean  @default(false)
   sender     User     @relation("MessageSender", fields: [senderId], references: [userId])
   receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [userId])
+  @@map("message")
 }
 
 model Exam {
@@ -176,6 +187,7 @@ model Exam {
   questions   Question[]
   user        User         @relation("ExamCreator", fields: [createdBy], references: [userId])
   examResults ExamResult[]
+  @@map("exam")
 }
 
 model Question {
@@ -186,6 +198,7 @@ model Question {
   options       Json
   correctAnswer String
   exam          Exam         @relation(fields: [examId], references: [examId])
+  @@map("question")
 }
 
 model ExamResult {
@@ -196,6 +209,7 @@ model ExamResult {
   completedAt DateTime @default(now())
   exam        Exam     @relation(fields: [examId], references: [examId])
   user        User     @relation(fields: [userId], references: [userId])
+  @@map("examresult")
 }
 
 model Product {
@@ -216,6 +230,7 @@ model Product {
   cartItems     CartItem[]
   wishlist      Wishlist[]
   guideline     Guideline[]
+  @@map("product")
 }
 
 model ProductPrice {
@@ -224,6 +239,7 @@ model ProductPrice {
   type      PriceType
   price     Decimal
   product   Product   @relation(fields: [productId], references: [productId])
+  @@map("productprice")
 }
 
 model Order {
@@ -236,6 +252,7 @@ model Order {
   updatedAt   DateTime    @default(now())
   orderItems  OrderItem[]
   user        User        @relation(fields: [userId], references: [userId])
+  @@map("order")
 }
 
 model OrderItem {
@@ -246,6 +263,7 @@ model OrderItem {
   price       Decimal
   order       Order   @relation(fields: [orderId], references: [orderId])
   product     Product @relation(fields: [productId], references: [productId])
+  @@map("orderitem")
 }
 
 model Cart {
@@ -253,6 +271,7 @@ model Cart {
   userId    Int     @unique
   user      User    @relation(fields: [userId], references: [userId])
   cartItems CartItem[]
+  @@map("cart")
 }
 
 model CartItem {
@@ -264,6 +283,7 @@ model CartItem {
   product    Product @relation(fields: [productId], references: [productId])
 
   @@unique([cartId, productId])
+  @@map("cartitem")
 }
 
 model Wishlist {
@@ -272,6 +292,7 @@ model Wishlist {
   productId  Int
   user       User    @relation(fields: [userId], references: [userId])
   product    Product @relation(fields: [productId], references: [productId])
+  @@map("wishlist")
 }
 
 model Guideline {
@@ -285,6 +306,7 @@ model Guideline {
   updatedAt   DateTime      @default(now())
   product     Product       @relation(fields: [productId], references: [productId])
   user        User          @relation("GuidelineUploader", fields: [uploadedBy], references: [userId])
+  @@map("guideline")
 }
 
 model BeautyService {
@@ -299,6 +321,7 @@ model BeautyService {
   updatedAt          DateTime            @default(now())
   availability       Availability[]
   beautyAppointments BeautyAppointment[]
+  @@map("beautyservice")
 }
 
 model BeautyAppointment {
@@ -312,6 +335,7 @@ model BeautyAppointment {
   updatedAt       DateTime          @default(now())
   user            User              @relation(fields: [userId], references: [userId])
   beautyService   BeautyService     @relation(fields: [serviceId], references: [serviceId])
+  @@map("beautyappoinment")
 }
 
 model Availability {
@@ -321,6 +345,7 @@ model Availability {
   startTime      DateTime
   endTime        DateTime
   beautyService  BeautyService @relation(fields: [serviceId], references: [serviceId])
+  @@map("availability")
 }
 
 model Review {
@@ -332,6 +357,7 @@ model Review {
   isApproved    Boolean       @default(false)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @default(now())
+  @@map("review")
 }
 
 enum UserLabel {

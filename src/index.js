@@ -10,7 +10,7 @@ const main = express();
 
 // Konfigurasi CORS
 const corsOptions = {
-    origin: ['http://92.112.192.81:3000', 'http://127.0.0.1:3000','http://localhost:3001', 'http://127.0.0.1:3001', 'https://myg.app'],
+    origin: ['http://92.112.192.81:3000','http://localhost:3000', 'http://127.0.0.1:3000', 'https://myg.app'],
     credentials: true,
     methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -78,6 +78,9 @@ const layananRoutes = require('./route/myBeauticaRoute/layananRoutes');
 //admin route
 const adminRoutes = require('./route/authentication/adminRoute');
 
+//admin myacademy route
+const adminMyAcademyRoutes = require('./route/authentication/adminMyAcademyRoute.js');
+
 // Gunakan global routes
 main.use('/myg/api/', testimoniRoutes);
 
@@ -106,6 +109,9 @@ main.use('/myg/api/layanan', layananRoutes);
 
 // Gunakan Admin Route
 main.use('/admin/adminPage', adminRoutes);
+
+// Gunakan Admin untuk MyAcademy
+main.use('/admin/myAcademy', adminMyAcademyRoutes);
 
 main.listen(PORT, () => {
     console.log('Server is running! port: ' + PORT);

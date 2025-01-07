@@ -21,12 +21,12 @@ class AuthService {
       type
     };
 
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { 
-      expiresIn: this.tokenExpiry.access 
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: this.tokenExpiry.access
     });
-    
-    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { 
-      expiresIn: this.tokenExpiry.refresh 
+
+    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
+      expiresIn: this.tokenExpiry.refresh
     });
 
     // Tambahkan family ID untuk mengelompokkan refresh tokens
@@ -46,7 +46,7 @@ class AuthService {
           token: token
         }
       });
-      
+
       // Kemudian buat token baru
       return await database.refreshToken.create({
         data: {
@@ -67,7 +67,7 @@ class AuthService {
     }
   }
 
-  
+
   // Tambahkan juga cleanup untuk token lama
   async cleanupOldTokens(userId, type = 'user') {
     const oneWeekAgo = new Date();
@@ -83,22 +83,22 @@ class AuthService {
       }
     });
   }
-  
+
   async login(email, password, type = 'user') {
     let account;
     let accountFound = false;
-    
+
     try {
       // Cari di tabel admin terlebih dahulu
       if (type === 'user') {
         // Cek di tabel admin dulu
-        account = await database.admin.findUnique({ 
+        account = await database.admin.findUnique({
           where: { email }
         });
 
         // Jika tidak ditemukan di admin, cari di tabel user
         if (!account) {
-          account = await database.user.findUnique({ 
+          account = await database.user.findUnique({
             where: { email },
             include: {
               userProfiles: {
@@ -120,7 +120,7 @@ class AuthService {
         }
       } else {
         // Jika type explicitly 'admin', hanya cari di tabel admin
-        account = await database.admin.findUnique({ 
+        account = await database.admin.findUnique({
           where: { email }
         });
         if (account) accountFound = true;
@@ -144,14 +144,14 @@ class AuthService {
 
       const tokens = await this.#generateTokens(account, type);
 
-      const formattedAccount = type === 'user' ? 
-        this.#formatUserResponse(account) : 
+      const formattedAccount = type === 'user' ?
+        this.#formatUserResponse(account) :
         this.#formatAdminResponse(account);
 
-      return { 
-        ...tokens, 
+      return {
+        ...tokens,
         account: formattedAccount,
-        accountType: type 
+        accountType: type
       };
     } catch (error) {
       if (error instanceof AuthenticationError) {
@@ -203,7 +203,7 @@ class AuthService {
   async refreshAccessToken(oldRefreshToken) {
     let decoded;
     let currentToken;
-    
+
     try {
       // Step 1: Validasi token format
       if (!oldRefreshToken) {
@@ -219,7 +219,7 @@ class AuthService {
         console.log('Decoded token:', { ...decoded, exp: new Date(decoded.exp * 1000) });
       } catch (error) {
         console.error('JWT Verification error:', error);
-        
+
         if (error instanceof jwt.TokenExpiredError) {
           throw new AuthenticationError(
             'Refresh token telah kadaluarsa. Silakan login kembali.',
@@ -234,7 +234,7 @@ class AuthService {
 
       // Step 3: Cari token di database
       try {
-        currentToken = await database.refreshToken.findUnique({ 
+        currentToken = await database.refreshToken.findUnique({
           where: { token: oldRefreshToken },
           include: {
             user: {
@@ -255,7 +255,7 @@ class AuthService {
             }
           }
         });
-        
+
         console.log('Database token found:', {
           tokenId: currentToken?.id,
           userId: currentToken?.userId,
@@ -289,12 +289,12 @@ class AuthService {
 
       // Step 6: Validasi data user/admin
       const account = decoded.type === 'user' ? currentToken.user : currentToken.admin;
-      
+
       if (!account) {
-        console.error('Account not found:', { 
-          type: decoded.type, 
-          userId: currentToken.userId, 
-          adminId: currentToken.adminId 
+        console.error('Account not found:', {
+          type: decoded.type,
+          userId: currentToken.userId,
+          adminId: currentToken.adminId
         });
         throw new AuthenticationError(
           'Akun tidak ditemukan. Silakan login kembali.',
@@ -319,11 +319,11 @@ class AuthService {
       try {
         // Sebelum generate token baru, bersihkan token lama
         await this.cleanupOldTokens(decoded.id, decoded.type);
-        
+
         // Generate token baru
         const tokens = await this.#generateTokens(account, decoded.type);
-        return { 
-          accessToken: tokens.accessToken, 
+        return {
+          accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           tokenType: 'Bearer'
         };
@@ -354,14 +354,14 @@ class AuthService {
       if (error instanceof AuthenticationError) {
         throw error;
       }
-      
+
       throw new AuthenticationError(
         'Terjadi kesalahan saat memperbarui token. Silakan login kembali.',
         'REFRESH_TOKEN_FAILED'
       );
     }
   }
-  
+
   async revokeTokenFamily(familyId) {
     await database.refreshToken.updateMany({
       where: { familyId },
@@ -372,7 +372,7 @@ class AuthService {
   async registerUser(email, password = '', userProfile, role = 'MEMBER', userLabel = 'MYA') {
     try {
       const hashedPassword = password ? await argon2.hash(password) : '';
-      
+
       return await database.user.create({
         data: {
           email,
@@ -434,7 +434,7 @@ class AuthService {
 
     try {
       const user = await database.user.findUnique({
-        where: { 
+        where: {
           userId: parseInt(userId) // Menggunakan userId sesuai schema
         },
         include: {
@@ -465,12 +465,12 @@ class AuthService {
       if (error instanceof AuthenticationError) {
         throw error;
       }
-      
+
       console.error('Get user profile error:', error);
       throw new Error('Gagal mengambil profil pengguna');
     }
   }
-  
+
   async deleteExpiredRefreshTokens() {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() - 7);
