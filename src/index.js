@@ -18,7 +18,7 @@ const corsOptions = {
 main.use(cors(corsOptions));
 
 main.use(bodyParser.json());
-main.use(bodyParser.urlencoded({ extended: false }));
+main.use(bodyParser.urlencoded({ extended: true }));
 main.use(cookieParser());
 
 // Middleware untuk menangani unggahan file
@@ -31,22 +31,22 @@ main.use('/uploads', (req, res, next) => {
 });
 
 
-main.use(cors(corsOptions));
+// main.use(cors(corsOptions));
 
-main.use(bodyParser.json());
-main.use(bodyParser.urlencoded({
-    extended: false
-}));
-main.use(cookieParser());
+// main.use(bodyParser.json());
+// main.use(bodyParser.urlencoded({
+//     extended: false
+// }));
+// main.use(cookieParser());
 
 // Middleware untuk menangani unggahan file
-main.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// main.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Middleware logging untuk permintaan ke rute statis (opsional, untuk debugging)
-main.use('/uploads', (req, res, next) => {
-    console.log(`Request to static file: ${req.path}`);
-    next();
-});
+// // Middleware logging untuk permintaan ke rute statis (opsional, untuk debugging)
+// main.use('/uploads', (req, res, next) => {
+//     console.log(`Request to static file: ${req.path}`);
+//     next();
+// });
 
 // global route
 const testimoniRoutes = require('./route/testimoniRoute/testimoniRoute');

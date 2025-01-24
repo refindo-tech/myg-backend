@@ -1,6 +1,9 @@
 // routes/adminMyAcademyRoute.js
 const express = require('express');
+const multer = require('multer')
+const handleFormData = multer();
 const router = express.Router();
+const { adminUpload } = require('../../middlewares/uploadMiddleware');
 const corsMiddleware = require('../../middlewares/corsMiddleware');
 const { authMiddleware } = require('../../middlewares/authMiddleware.js'); 
 const adminMyAcademy = require('../../controllers/authentication/adminMyAcademyController');
@@ -9,14 +12,17 @@ const adminMyAcademy = require('../../controllers/authentication/adminMyAcademyC
 router.use(corsMiddleware);
 
 //router to create new event
-router.use('/createEvent', authMiddleware,adminMyAcademy.createTraining);
+router.post('/createEvent', authMiddleware, adminUpload.upload.single('posteracara'), adminMyAcademy.createTraining);
+
+//router to list event
+router.get('/listEvent', authMiddleware, adminMyAcademy.listTraining)
 
 //router to detail event
-router.use('/detailEvent/:trainingId', authMiddleware, adminMyAcademy.detailTraining);
+router.get('/detailEvent/:trainingId', authMiddleware, adminMyAcademy.detailTraining);
 
 //router to update event
-router.use('/updateEvent/:trainingId', authMiddleware, adminMyAcademy.updateTraining);
+router.put('/updateEvent/:trainingId', authMiddleware, adminUpload.upload.single('posteracara'), adminMyAcademy.updateTraining);
 
 //router to delete event
-router.use('/deleteEvent/:trainingId', authMiddleware, adminMyAcademy.deleteTraining);
+router.delete('/deleteEvent/:trainingId', authMiddleware, adminMyAcademy.deleteTraining);
 module.exports = router;

@@ -4,9 +4,24 @@ const trainingService = require('../../services/myAcademyServices/admin/adminTra
 class AdminMyAcademy{
     createTraining = async (req, res) => {
         try {
+            console.log(req.headers)
+            console.log(req.body)
+            if (!req.body || Object.keys(req.body).length === 0) {
+                throw new Error('Request body cannot be empty');
+            }
             const newTraining = await trainingService.createTraining(req);
             return res.status(201).json(
                 webResponses.successResponse('Training created successfully', newTraining)
+            );
+        } catch (error) {
+            return this.handleError(error, res);
+        }
+    }
+    listTraining = async (req, res) => {
+        try {
+            const training = await trainingService.listTraining(req);
+            return res.status(200).json(
+                webResponses.successResponse('List training retrieved successfully', training)
             );
         } catch (error) {
             return this.handleError(error, res);
