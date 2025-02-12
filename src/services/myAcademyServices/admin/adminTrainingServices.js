@@ -57,8 +57,8 @@ class AdminTrainingServices {
                 const where = { trainingName: { contains: search } }
                 const orderBy = { dateStart: 'desc' }
                 const include = { materials: true }
-                const skip = parseInt(page) === 1 ? 0 : parseInt(page)
-                const take = parseInt(limit)
+                const skip = (Number(page) - 1) * Number(limit)
+                const take = Number(limit)
                 if (search) {
                     return {
                         where: where,
@@ -74,31 +74,8 @@ class AdminTrainingServices {
                     skip:skip,
                     take:take
                 }
-                // return{
-                //     orderBy: {
-                //         dateStart: 'desc'
-                //     },
-                //     include: {
-                //         materials: true
-                //     },
-                //     skip: parseInt(page) === 1 ? 0 : parseInt(page),
-                //     take: parseInt(limit)
-                // }
             }
-            console.log(config())
-            // req.query.search ? {trainingName:{contains:req.query.search, mode:"insensitive"}} : 
             const list = await database.training.findMany(
-                // {
-                //     where:{trainingName:{contains:req.query.search}},
-                //     orderBy: {
-                //         dateStart: 'desc'
-                //     },
-                //     include: {
-                //         materials: true
-                //     },
-                //     skip: parseInt(page) === 1 ? 0 : parseInt(page),
-                //     take: parseInt(limit),
-                // }
                 config()
             )
             if (list) {
@@ -167,8 +144,8 @@ class AdminTrainingServices {
                                     description: req.body.description,
                                     type: req.body.type ? req.body.type : "OFFLINE",
                                     membershipLevel: req.body.membershipLevel ? req.body.membershipLevel : "FREE",
-                                    banner: req.file?.path || "",
-                                    brosur: req.file?.path || null,
+                                    banner: req.file?.path || req.body.posteracara,
+                                    brosur: req.file?.path || req.body.posteracara,
                                     ebook: req.body.ebook || null,
                                     youtubeVideo: req.body.youtubeVideo || null,
                                     uploadedBy: parseInt(req.user.id)
