@@ -11,7 +11,6 @@ class AdminTrainingServices {
                     dateStart: new Date(req.body.dateStart),
                     address: req.body.address,
                     price: parseInt(req.body.price),
-                    uploadedBy: parseInt(req.user.id),
                     embedMaps: req.body.embedMaps,
                     materi: req.body.materi,
                     benefit: req.body.benefit,
@@ -30,7 +29,6 @@ class AdminTrainingServices {
                         brosur: req.file?.path || null,
                         ebook: req.body.ebook || null,
                         youtubeVideo: req.body.youtubeVideo || null,
-                        uploadedBy: parseInt(req.user.id)
                     }
                 })
                 if (createMaterial) {
@@ -47,7 +45,6 @@ class AdminTrainingServices {
     }
     listTraining = async (req) => {
         try {
-            console.log(req.query)
             const { page, limit, search } = req.query
             const count = await database.training.count()
                 // {
@@ -129,7 +126,6 @@ class AdminTrainingServices {
                         dateStart: new Date(req.body.dateStart),
                         address: req.body.address,
                         price: parseInt(req.body.price),
-                        uploadedBy: parseInt(req.user.id),
                         embedMaps: req.body.embedMaps,
                         linkMaps: req.body.linkMaps,
                         materi: req.body.materi,
@@ -148,7 +144,6 @@ class AdminTrainingServices {
                                     brosur: req.file?.path || req.body.posteracara,
                                     ebook: req.body.ebook || null,
                                     youtubeVideo: req.body.youtubeVideo || null,
-                                    uploadedBy: parseInt(req.user.id)
                                 }
                             }
                         }

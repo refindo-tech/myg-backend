@@ -1,5 +1,5 @@
 generator client {
-  provider      = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -15,14 +15,11 @@ model User {
   role      UserRole   @default(MEMBER)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now())
-
   refreshToken       RefreshToken[]
   userProfiles       UserProfile[]
   socialMedias       SocialMedia[]
   userCoins          UserCoin[]
   notifications      Notification[]
-  materials          Material[]          @relation("MaterialUploader")
-  trainings          Training[]          @relation("TrainingUploader")
   messagesSent       Message[]           @relation("MessageSender")
   messagesReceived   Message[]           @relation("MessageReceiver")
   exams              Exam[]              @relation("ExamCreator")
@@ -47,51 +44,54 @@ model RefreshToken {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  user       User?     @relation(fields: [userId], references: [userId])
-  admin      Admin?    @relation(fields: [adminId], references: [adminId])
+  user  User?  @relation(fields: [userId], references: [userId])
+  admin Admin? @relation(fields: [adminId], references: [adminId])
+
   @@map("refreshtoken")
 }
 
 model Admin {
-  adminId     Int      @id @default(autoincrement())
-  name        String
-  email       String   @unique
-  password    String
-  profilePicture String?  @db.VarChar(512)
-  userLabel   UserLabel?
-  role        UserRole   @default(ADMIN)
+  adminId        Int        @id @default(autoincrement())
+  name           String
+  email          String     @unique
+  password       String
+  profilePicture String?    @db.VarChar(512)
+  userLabel      UserLabel?
+  role           UserRole   @default(ADMIN)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
   refreshToken RefreshToken[]
+
   @@map("admin")
 }
 
 model UserProfile {
-  profileId      Int      @id @default(autoincrement())
+  profileId      Int       @id @default(autoincrement())
   userId         Int
   fullName       String
   address        String?
   phoneNumber    String?
   socialMedia    String?
-  profilePicture String?  @db.VarChar(512)
-  studioName     String?  @db.VarChar(512)
-  ktpPicture     String?  @db.VarChar(512)
-  studioLogo     String?  @db.VarChar(512)
+  profilePicture String?   @db.VarChar(512)
+  studioName     String?   @db.VarChar(512)
+  ktpPicture     String?   @db.VarChar(512)
+  studioLogo     String?   @db.VarChar(512)
   birthdate      DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now())
-  user           User     @relation(fields: [userId], references: [userId])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [userId])
+
   @@map("userprofile")
 }
-
 
 model UserCoin {
   coinId Int  @id @default(autoincrement())
   userId Int
   value  Int
   user   User @relation(fields: [userId], references: [userId])
+
   @@map("usecoin")
 }
 
@@ -101,6 +101,7 @@ model SocialMedia {
   socialMediaAccount String
   socialMediaType    SocialMediaType
   user               User            @relation(fields: [userId], references: [userId])
+
   @@map("socialmedia")
 }
 
@@ -111,6 +112,7 @@ model Notification {
   message          String
   sentAt           DateTime         @default(now())
   user             User             @relation(fields: [userId], references: [userId])
+
   @@map("notification")
 }
 
@@ -118,7 +120,6 @@ model Training {
   trainingId   Int        @id @default(autoincrement())
   trainingName String
   description  String
-  uploadedBy   Int
   dateStart    DateTime?
   dateFinish   DateTime?
   address      String?
@@ -130,7 +131,7 @@ model Training {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now()) @updatedAt
   materials    Material[]
-  user         User       @relation("TrainingUploader", fields: [uploadedBy], references: [userId])
+
   @@map("training")
 }
 
@@ -147,11 +148,9 @@ model Material {
   ebook            String?
   youtubeVideo     String?
   zoomRecord       String?
-  uploadedBy       Int
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @default(now()) @updatedAt
   training         Training        @relation(fields: [trainingId], references: [trainingId], onDelete: Cascade)
-  user             User            @relation("MaterialUploader", fields: [uploadedBy], references: [userId])
   @@map("material")
 }
 
@@ -165,6 +164,7 @@ model Message {
   isDeleted  Boolean  @default(false)
   sender     User     @relation("MessageSender", fields: [senderId], references: [userId])
   receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [userId])
+
   @@map("message")
 }
 
@@ -187,6 +187,7 @@ model Exam {
   questions   Question[]
   user        User         @relation("ExamCreator", fields: [createdBy], references: [userId])
   examResults ExamResult[]
+
   @@map("exam")
 }
 
@@ -198,6 +199,7 @@ model Question {
   options       Json
   correctAnswer String
   exam          Exam         @relation(fields: [examId], references: [examId])
+
   @@map("question")
 }
 
@@ -209,27 +211,29 @@ model ExamResult {
   completedAt DateTime @default(now())
   exam        Exam     @relation(fields: [examId], references: [examId])
   user        User     @relation(fields: [userId], references: [userId])
+
   @@map("examresult")
 }
 
 model Product {
-  productId     Int            @id @default(autoincrement())
+  productId     Int             @id @default(autoincrement())
   name          String
-  description   String        @db.Text
+  description   String          @db.Text
   stock         Int
   productImages Json
-  type          ProductType  @default(PRODUCT)
+  type          ProductType     @default(PRODUCT)
   category      ProductCategory @default(FACE_CARE)
   isRecommended Boolean
   uploadedBy    Int
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @default(now())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now())
   price         ProductPrice[]
-  user          User           @relation("ProductUploader", fields: [uploadedBy], references: [userId])
+  user          User            @relation("ProductUploader", fields: [uploadedBy], references: [userId])
   orderItems    OrderItem[]
   cartItems     CartItem[]
   wishlist      Wishlist[]
   guideline     Guideline[]
+
   @@map("product")
 }
 
@@ -239,6 +243,7 @@ model ProductPrice {
   type      PriceType
   price     Decimal
   product   Product   @relation(fields: [productId], references: [productId])
+
   @@map("productprice")
 }
 
@@ -252,6 +257,7 @@ model Order {
   updatedAt   DateTime    @default(now())
   orderItems  OrderItem[]
   user        User        @relation(fields: [userId], references: [userId])
+
   @@map("order")
 }
 
@@ -263,14 +269,16 @@ model OrderItem {
   price       Decimal
   order       Order   @relation(fields: [orderId], references: [orderId])
   product     Product @relation(fields: [productId], references: [productId])
+
   @@map("orderitem")
 }
 
 model Cart {
-  cartId    Int     @id @default(autoincrement())
-  userId    Int     @unique
-  user      User    @relation(fields: [userId], references: [userId])
+  cartId    Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [userId])
   cartItems CartItem[]
+
   @@map("cart")
 }
 
@@ -292,6 +300,7 @@ model Wishlist {
   productId  Int
   user       User    @relation(fields: [userId], references: [userId])
   product    Product @relation(fields: [productId], references: [productId])
+
   @@map("wishlist")
 }
 
@@ -306,6 +315,7 @@ model Guideline {
   updatedAt   DateTime      @default(now())
   product     Product       @relation(fields: [productId], references: [productId])
   user        User          @relation("GuidelineUploader", fields: [uploadedBy], references: [userId])
+
   @@map("guideline")
 }
 
@@ -321,6 +331,7 @@ model BeautyService {
   updatedAt          DateTime            @default(now())
   availability       Availability[]
   beautyAppointments BeautyAppointment[]
+
   @@map("beautyservice")
 }
 
@@ -335,6 +346,7 @@ model BeautyAppointment {
   updatedAt       DateTime          @default(now())
   user            User              @relation(fields: [userId], references: [userId])
   beautyService   BeautyService     @relation(fields: [serviceId], references: [serviceId])
+
   @@map("beautyappoinment")
 }
 
@@ -345,18 +357,20 @@ model Availability {
   startTime      DateTime
   endTime        DateTime
   beautyService  BeautyService @relation(fields: [serviceId], references: [serviceId])
+
   @@map("availability")
 }
 
 model Review {
-  reviewId      Int           @id @default(autoincrement())
-  name          String        @default("Sahabat My Academi")
-  email         String        @default("sahabat@myacademy.com")
-  role          String        @default("Member")
-  comment       String        @db.Text
-  isApproved    Boolean       @default(false)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @default(now())
+  reviewId   Int      @id @default(autoincrement())
+  name       String   @default("Sahabat My Academi")
+  email      String   @default("sahabat@myacademy.com")
+  role       String   @default("Member")
+  comment    String   @db.Text
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+
   @@map("review")
 }
 
